@@ -1,9 +1,12 @@
-iterate
+Index.iterate
+
+other properties on cursor (which aren't they same for indexes and object stores!)
 
 add getAll to fakeIndexedDB, then use here
 
-more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas
+more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas and you have to parse the string into a number
 
-all those _wrapRequest calls in DB.js, not very DRY
+all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
 
 test in browsers, particularly the promise race condition stuff
+  zuul or karma? try zuul first, like https://github.com/nolanlawson/pseudo-worker

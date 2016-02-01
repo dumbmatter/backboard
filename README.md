@@ -76,10 +76,7 @@ When it's done, it will look something like this:
                     console.log(key);
                     return db.players.index('tid').get(0);
                 })
-                .then((player) => {
-                    console.log(player);
-                });
-
+                .then((player) => console.log(player));
         })
         .then(() => {
             // Transaction API: transaction can be reused across many queries - can provide a huge performance boost!
@@ -96,9 +93,7 @@ When it's done, it will look something like this:
 
                     // This part is optional, it just lets you hook into the underlying IDBTransaction's oncomplete event
                     return tx.complete()
-                        .then(() => {
-                            console.log('Transaction completed');
-                        })
+                        .then(() => console.log('Transaction completed'));
                 });
         })
         .then(() => {
@@ -106,7 +101,12 @@ When it's done, it will look something like this:
             return db.players.index('tid').iterate({
                 key: Backboard.lowerBound(0),
                 direction: 'next',
-                callback: (p, shortCircuit) => {
+                callback: (p, shortCircuit, advance) => {
+                    // Skip ahead next iteration, same as cursor.advance
+                    if (p.pid === 2) {
+                        advance(5);
+                    }
+
                     // Use the shortCircuit function to stop iteration after this callback runs
                     if (p.pid > 10) {
                         shortCircuit();
@@ -123,13 +123,7 @@ When it's done, it will look something like this:
             // Other IndexedDB functions are present too
             console.log(db.objectStoreNames);
             return db.players.delete(0)
-                .then(() => {
-                    return db.teams.clear();
-                })
-                .then(() => {
-                    return db.teams.count();
-                })
-                .then((numTeams) => {
-                    console.log(numTeams);
-                });
+                .then(() => db.teams.count())
+                .then((numTeams) => console.log(numTeams))
+                .then(() => db.teams.clear());
         });

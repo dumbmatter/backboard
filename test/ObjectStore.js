@@ -1,5 +1,6 @@
+'use strict';
+
 const assert = require('assert');
-GLOBAL.indexedDB = require('fake-indexeddb');
 const Backboard = require('..');
 
 const schemas = [{
@@ -20,7 +21,7 @@ const schemas = [{
     }
 }];
 
-var db, player;
+let db, player;
 
 describe('ObjectStore', () => {
     beforeEach(() => {
@@ -49,9 +50,7 @@ describe('ObjectStore', () => {
 
                     return db.players.get(4);
                 })
-                .then((playerFromDb) => {
-                    assert.deepEqual(playerFromDb, player);
-                });
+                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
         });
 
         it('should error on key collision', () => {
@@ -60,9 +59,8 @@ describe('ObjectStore', () => {
                     assert.equal(key, 4);
                     return db.players.add(player);
                 })
-                .catch((err) => {
-                    assert.equal(err.name, 'ConstraintError');
-                });
+                .then(assert.fail)
+                .catch((err) => assert.equal(err.name, 'ConstraintError'));
         });
     });
 
@@ -74,9 +72,7 @@ describe('ObjectStore', () => {
                     assert.equal(key, 4);
                     return tx.players.get(4);
                 })
-                .then((playerFromDb) => {
-                    assert.deepEqual(playerFromDb, player);
-                });
+                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
         });
 
         it('should update record on key collision', () => {
@@ -91,9 +87,7 @@ describe('ObjectStore', () => {
                     assert.equal(key, 4);
                     return tx.players.get(4);
                 })
-                .then((playerFromDb) => {
-                    assert.equal(playerFromDb.name, 'Updated');
-                });
+                .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
         });
     });
 
@@ -106,9 +100,7 @@ describe('ObjectStore', () => {
                 })
                 .then(() => db.players.clear())
                 .then(() => db.players.count())
-                .then((numPlayers) => {
-                    assert.equal(numPlayers, 0);
-                });
+                .then((numPlayers) => assert.equal(numPlayers, 0));
         });
     });
 
@@ -120,9 +112,7 @@ describe('ObjectStore', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.count())
-                .then((numPlayers) => {
-                    assert.equal(numPlayers, 2);
-                });
+                .then((numPlayers) => assert.equal(numPlayers, 2));
         });
     });
 
@@ -140,9 +130,127 @@ describe('ObjectStore', () => {
 
                     return db.players.get(5);
                 })
-                .then((playerFromDb) => {
-                    assert.deepEqual(playerFromDb, player);
+                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+        });
+    });
+
+    describe('iterate', () => {
+        beforeEach(() => {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    player.pid = 6;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    player.pid = 7;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    player.pid = 8;
+                    return db.players.add(player);
                 });
+        });
+
+        it('should iterate over all records in store', () => {
+            let count = 0;
+            const pids = [4, 5, 6, 7, 8];
+            const options = {
+                callback: (player) => {
+                    assert.equal(player.pid, pids[count]);
+                    count++;
+                }
+            };
+            return db.players.iterate(options)
+                .then(() => assert.equal(count, pids.length));
+        });
+
+        it('should iterate over all records in store in reverse', () => {
+            let count = 0;
+            const pids = [8, 7, 6, 5, 4];
+            const options = {
+                direction: 'prev',
+                callback: (player) => {
+                    assert.equal(player.pid, pids[count]);
+                    count++;
+                }
+            };
+            return db.players.iterate(options)
+                .then(() => assert.equal(count, pids.length));
+        });
+
+        it('should iterate over records starting with key', () => {
+            let count = 0;
+            const pids = [6, 7, 8];
+            const options = {
+                key: Backboard.lowerBound(6),
+                callback: (player) => {
+                    assert.equal(player.pid, pids[count]);
+                    count++;
+                }
+            };
+            return db.players.iterate(options)
+                .then(() => assert.equal(count, pids.length));
+        });
+
+        it('should short circuit', () => {
+            let count = 0;
+            const options = {
+                callback: (player, shortCircuit) => {
+                    shortCircuit();
+                    count++;
+                }
+            };
+            return db.players.iterate(options)
+                .then(() => assert.equal(count, 1));
+        });
+
+        it('should update when callback returns an object', () => {
+            const tx = db.tx('players', 'readwrite');
+            const options = {
+                key: 6,
+                callback: (player) => {
+                    player.updated = true;
+                    return player;
+                }
+            };
+            return tx.players.iterate(options)
+                .then(() => tx.players.get(6))
+                .then((player) => assert.equal(player.updated, true));
+        });
+
+        it('should update when callback resolves to an object', () => {
+            const tx = db.tx('players', 'readwrite');
+            const options = {
+                key: 6,
+                callback: (player) => {
+                    player.updated = true;
+                    return Promise.resolve(player);
+                }
+            };
+            return tx.players.iterate(options)
+                .then(() => tx.players.get(6))
+                .then((player) => assert.equal(player.updated, true));
+        });
+
+        it('should advance over multiple records', () => {
+            let count = 0;
+            const pids = [8, 7, 4];
+            const options = {
+                direction: 'prev',
+                callback: (player, shortCircuit, advance) => {
+                    assert.equal(player.pid, pids[count]);
+                    if (count === 1) {
+                        advance(3);
+                    }
+                    count++;
+                }
+            };
+            return db.players.iterate(options)
+                .then(() => assert.equal(count, pids.length));
         });
     });
 });

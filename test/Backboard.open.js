@@ -1,5 +1,4 @@
 const assert = require('assert');
-GLOBAL.indexedDB = require('fake-indexeddb');
 const Backboard = require('..');
 
 const schemas = [{
@@ -137,7 +136,7 @@ describe('Backboard.open', () => {
                 });
         });
 
-        it('should recreate index if options change');
+        it('should recreate index if options change'); // How to test this? Need to actually use feature of Index, or read index.multiEntry property (need to expose it first, though)
         it('should run upgradeFunction if present');
     });
 });

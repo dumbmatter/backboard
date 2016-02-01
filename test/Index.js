@@ -1,5 +1,6 @@
+'use strict';
+
 const assert = require('assert');
-GLOBAL.indexedDB = require('fake-indexeddb');
 const Backboard = require('..');
 
 const schemas = [{
@@ -20,7 +21,7 @@ const schemas = [{
     }
 }];
 
-var db, player;
+let db, player;
 
 describe('Index', () => {
     beforeEach(() => {
@@ -45,17 +46,13 @@ describe('Index', () => {
         it('should allow query by index', () => {
             return db.players.add(player)
                 .then(() => db.players.index('tid').get(1))
-                .then((playerFromDb) => {
-                    assert.deepEqual(playerFromDb, player);
-                });
+                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
         });
 
         it('should return undefined if no matching key', () => {
             return db.players.add(player)
                 .then(() => db.players.index('tid').get(2))
-                .then((playerFromDb) => {
-                    assert.equal(playerFromDb, undefined);
-                });
+                .then((playerFromDb) => assert.equal(playerFromDb, undefined));
         });
     });
 
@@ -67,9 +64,7 @@ describe('Index', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.index('tid').count())
-                .then((numPlayers) => {
-                    assert.equal(numPlayers, 2);
-                });
+                .then((numPlayers) => assert.equal(numPlayers, 2));
         });
     });
 });

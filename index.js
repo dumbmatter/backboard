@@ -1,7 +1,7 @@
 'use strict';
 
-var upgrade = require('./lib/upgrade');
-var DB = require('./lib/DB');
+const upgrade = require('./lib/upgrade');
+const DB = require('./lib/DB');
 
 class Backboard {
     static open(name, schemas) {
@@ -24,6 +24,19 @@ class Backboard {
             request.onupgradeneeded = () => reject(new Error('Unexpected upgradeneeded event'));
             request.onsuccess = () => resolve();
         });
+    }
+
+    static lowerBound() {
+        return IDBKeyRange.lowerBound.apply(IDBKeyRange, arguments);
+    }
+    static upperBound() {
+        return IDBKeyRange.upperBound.apply(IDBKeyRange, arguments);
+    }
+    static only() {
+        return IDBKeyRange.only.apply(IDBKeyRange, arguments);
+    }
+    static bound() {
+        return IDBKeyRange.bound.apply(IDBKeyRange, arguments);
     }
 }
 

@@ -26,7 +26,7 @@
     "fake-indexeddb": "^1.0.3",
     "mocha": "^2.4.5"
   },
-  "dependencies": {
-    "deep-equal": "^1.0.1"
+  "engines": {
+    "node": ">=4.2.0"
   }
 }
