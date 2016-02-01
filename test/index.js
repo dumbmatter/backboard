@@ -89,8 +89,56 @@ describe('Backboard.open', () => {
                 });
         });
 
-        it('should create new index');
-        it('should delete obsolete index');
+        it('should create new index', () => {
+            const newSchemas = schemas.concat({
+                version: 2,
+                objectStores: {
+                    players: {
+                        options: {keyPath: 'pid', autoIncrement: true},
+                        indexes: {
+                            tid: {keyPath: 'tid'}
+                        }
+                    },
+                    teams: {
+                        options: {keyPath: 'pid', autoIncrement: true},
+                        indexes: {
+                            tid: {keyPath: 'tid', unique: true},
+                            foo: {keyPath: 'foo', unique: true}
+                        }
+                    }
+                }
+            });
+
+            return Backboard.open('test', newSchemas)
+                .then(function (db) {
+                    assert.deepEqual(db.teams.indexNames.sort(), ['foo', 'tid']);
+                    db.close();
+                });
+        });
+
+        it('should delete obsolete index', () => {
+            const newSchemas = schemas.concat({
+                version: 2,
+                objectStores: {
+                    players: {
+                        options: {keyPath: 'pid', autoIncrement: true},
+                        indexes: {
+                            tid: {keyPath: 'tid'}
+                        }
+                    },
+                    teams: {
+                        options: {keyPath: 'pid', autoIncrement: true}
+                    }
+                }
+            });
+
+            return Backboard.open('test', newSchemas)
+                .then(function (db) {
+                    assert.deepEqual(db.teams.indexNames, []);
+                    db.close();
+                });
+        });
+
         it('should recreate index if options change');
         it('should run upgradeFunction if present');
     })
