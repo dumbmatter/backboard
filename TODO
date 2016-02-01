@@ -1,0 +1,7 @@
+count/delete/clear
+
+iterate
+
+_wrapRequest DRY - some kind of inheritance/mixin
+
+add getAll to fakeIndexedDB, then use here
