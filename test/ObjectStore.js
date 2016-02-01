@@ -20,7 +20,7 @@ const schemas = [{
     }
 }];
 
-var player;
+var db, player;
 
 describe('ObjectStore', () => {
     beforeEach(() => {
@@ -29,75 +29,70 @@ describe('ObjectStore', () => {
             tid: 1,
             name: 'John Smith'
         };
+
+        return Backboard.open('test', schemas)
+            .then((dbLocal) => {
+                db = dbLocal
+            });
     })
+
     afterEach(() => {
+        db.close();
         return Backboard.delete('test');
     });
 
     describe('add (transaction-free API)', () => {
         it('should add a new record to the database', () => {
-            return Backboard.open('test', schemas)
-                .then((db) => {
-                    return db.players.add(player)
-                        .then((key) => {
-                            assert.equal(key, 4);
+            return db.players.add(player)
+                .then((key) => {
+                    assert.equal(key, 4);
 
-                            return db.players.get(4);
-                        })
-                        .then((playerFromDb) => {
-                            assert.deepEqual(playerFromDb, player);
-                        });
+                    return db.players.get(4);
+                })
+                .then((playerFromDb) => {
+                    assert.deepEqual(playerFromDb, player);
                 });
         });
 
         it('should error on key collision', () => {
-            return Backboard.open('test', schemas)
-                .then((db) => {
-                    return db.players.add(player)
-                        .then((key) => {
-                            assert.equal(key, 4);
-                            return db.players.add(4);
-                        })
-                        .catch((err) => {
-                            assert.equal(err.name, 'ConstraintError');
-                        });
+            return db.players.add(player)
+                .then((key) => {
+                    assert.equal(key, 4);
+                    return db.players.add(4);
+                })
+                .catch((err) => {
+                    assert.equal(err.name, 'DataError');
                 });
         });
     });
 
     describe('put (transaction API)', () => {
         it('should add a new record to the database', () => {
-            return Backboard.open('test', schemas)
-                .then((db) => {
-                    const tx = db.tx('players', 'readwrite');
-                    return tx.players.put(player)
-                        .then((key) => {
-                            assert.equal(key, 4);
-                            return tx.players.get(4);
-                        })
-                        .then((playerFromDb) => {
-                            assert.deepEqual(playerFromDb, player);
-                        });
+            const tx = db.tx('players', 'readwrite');
+            return tx.players.put(player)
+                .then((key) => {
+                    assert.equal(key, 4);
+                    return tx.players.get(4);
+                })
+                .then((playerFromDb) => {
+                    assert.deepEqual(playerFromDb, player);
                 });
         });
 
         it('should update record on key collision', () => {
-            return Backboard.open('test', schemas)
-                .then((db) => {
-                    const tx = db.tx('players', 'readwrite');
-                    return tx.players.put(player)
-                        .then((key) => {
-                            assert.equal(key, 4);
-                            player.name = 'Updated';
-                            return tx.players.put(player);
-                        })
-                        .then((key) => {
-                            assert.equal(key, 4);
-                            return tx.players.get(4);
-                        })
-                        .then((playerFromDb) => {
-                            assert.equal(playerFromDb.name, 'Updated');
-                        });
+            const tx = db.tx('players', 'readwrite');
+            return tx.players.put(player)
+                .then((key) => {
+                    assert.equal(key, 4);
+                    player.name = 'Updated';
+                    return tx.players.put(player);
+                })
+                .then((key) => {
+                    assert.equal(key, 4);
+                    return tx.players.get(4);
+                })
+                .then((playerFromDb) => {
+                    assert.equal(playerFromDb.name, 'Updated');
                 });
         });
     });
