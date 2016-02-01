@@ -27,9 +27,7 @@ describe('Backboard.open', () => {
 
     it('should create object stores', () => {
         return Backboard.open('test', schemas)
-            .then(function (db) {
-                db.close();
-            });
+            .then((db) => db.close());
     });
 
     it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
@@ -37,9 +35,7 @@ describe('Backboard.open', () => {
     describe('Schema upgrades', () => {
         beforeEach(function () {
             return Backboard.open('test', schemas)
-                .then(function (db) {
-                    db.close();
-                });
+                .then((db) => db.close());
         });
 
         it('should create new object store', () => {

@@ -44,9 +44,7 @@ describe('Index', () => {
     describe('get', () => {
         it('should allow query by index', () => {
             return db.players.add(player)
-                .then(() => {
-                    return db.players.index('tid').get(1);
-                })
+                .then(() => db.players.index('tid').get(1))
                 .then((playerFromDb) => {
                     assert.deepEqual(playerFromDb, player);
                 });
@@ -54,9 +52,7 @@ describe('Index', () => {
 
         it('should return undefined if no matching key', () => {
             return db.players.add(player)
-                .then(() => {
-                    return db.players.index('tid').get(2);
-                })
+                .then(() => db.players.index('tid').get(2))
                 .then((playerFromDb) => {
                     assert.equal(playerFromDb, undefined);
                 });
@@ -70,9 +66,7 @@ describe('Index', () => {
                     player.pid = 5;
                     return db.players.add(player);
                 })
-                .then(() => {
-                    return db.players.index('tid').count();
-                })
+                .then(() => db.players.index('tid').count())
                 .then((numPlayers) => {
                     assert.equal(numPlayers, 2);
                 });
