@@ -32,9 +32,9 @@ describe('ObjectStore', () => {
 
         return Backboard.open('test', schemas)
             .then((dbLocal) => {
-                db = dbLocal
+                db = dbLocal;
             });
-    })
+    });
 
     afterEach(() => {
         db.close();

@@ -21,7 +21,7 @@ class Backboard {
             const request = indexedDB.deleteDatabase(name);
             request.onerror = (event) => reject(event.target.error);
             request.onblocked = () => resolve(); // http://stackoverflow.com/a/27871590/786644
-            request.onupgradeneeded = (event) => reject(new Error('Unexpected upgradeneeded event'));
+            request.onupgradeneeded = () => reject(new Error('Unexpected upgradeneeded event'));
             request.onsuccess = () => resolve();
         });
     }

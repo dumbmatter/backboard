@@ -15,11 +15,14 @@
   ],
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "lint": "eslint index.js lib/**.js test/**.js",
+    "mocha": "mocha",
+    "test": "npm run lint && npm run mocha"
   },
   "author": "Jeremy Scheff <jdscheff@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "eslint": "^1.10.3",
     "fake-indexeddb": "^1.0.3",
     "mocha": "^2.4.5"
   },

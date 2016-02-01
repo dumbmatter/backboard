@@ -1,7 +1,5 @@
 iterate
 
-ESLint
-
 add getAll to fakeIndexedDB, then use here
 
 test in browsers, particularly the promise race condition stuff
