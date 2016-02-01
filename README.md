@@ -58,12 +58,14 @@ The goal is to come up with something like this:
 
     Backboard.open('database-name', schemas)
         .then((db) => {
-            // Transaction free API: each command is in its own transaction
+            // Transaction-free API: each command is in its own transaction
             return db.players.add({
+                    pid: 4,
                     name: 'Bob Jones',
                     tid: 0
                 })
-                .then(() => {
+                .then((key) => {
+                    console.log(key);
                     return db.players.index('tid').get(0);
                 })
                 .then((player) => {
@@ -72,7 +74,7 @@ The goal is to come up with something like this:
 
         })
         .then(() => {
-            // Transaction based API: transaction can be reused across many queries - can provide a huge performance boost!
+            // Transaction API: transaction can be reused across many queries - can provide a huge performance boost!
             const tx = db.tx('players'); // Same arguments as IDBDatabase.transaction
             return tx.players.add({
                     name: 'Bob Jones',

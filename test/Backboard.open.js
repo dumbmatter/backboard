@@ -32,6 +32,8 @@ describe('Backboard.open', () => {
             });
     });
 
+    it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
+
     describe('Schema upgrades', () => {
         beforeEach(function () {
             return Backboard.open('test', schemas)
@@ -141,5 +143,5 @@ describe('Backboard.open', () => {
 
         it('should recreate index if options change');
         it('should run upgradeFunction if present');
-    })
+    });
 });
