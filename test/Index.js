@@ -41,23 +41,41 @@ describe('Index', () => {
         return Backboard.delete('test');
     });
 
-    it('should allow query by index', () => {
-        return db.players.add(player)
-            .then(() => {
-                return db.players.index('tid').get(1);
-            })
-            .then((playerFromDb) => {
-                assert.deepEqual(playerFromDb, player);
-            });
+    describe('get', () => {
+        it('should allow query by index', () => {
+            return db.players.add(player)
+                .then(() => {
+                    return db.players.index('tid').get(1);
+                })
+                .then((playerFromDb) => {
+                    assert.deepEqual(playerFromDb, player);
+                });
+        });
+
+        it('should return undefined if no matching key', () => {
+            return db.players.add(player)
+                .then(() => {
+                    return db.players.index('tid').get(2);
+                })
+                .then((playerFromDb) => {
+                    assert.equal(playerFromDb, undefined);
+                });
+        });
     });
 
-    it('should return undefined if no matching key', () => {
-        return db.players.add(player)
-            .then(() => {
-                return db.players.index('tid').get(2);
-            })
-            .then((playerFromDb) => {
-                assert.equal(playerFromDb, undefined);
-            });
+    describe('count', () => {
+        it('should count all records in index', () => {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    return db.players.index('tid').count();
+                })
+                .then((numPlayers) => {
+                    assert.equal(numPlayers, 2);
+                });
+        });
     });
 });

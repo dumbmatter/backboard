@@ -58,10 +58,10 @@ describe('ObjectStore', () => {
             return db.players.add(player)
                 .then((key) => {
                     assert.equal(key, 4);
-                    return db.players.add(4);
+                    return db.players.add(player);
                 })
                 .catch((err) => {
-                    assert.equal(err.name, 'DataError');
+                    assert.equal(err.name, 'ConstraintError');
                 });
         });
     });
@@ -93,6 +93,22 @@ describe('ObjectStore', () => {
                 })
                 .then((playerFromDb) => {
                     assert.equal(playerFromDb.name, 'Updated');
+                });
+        });
+    });
+
+    describe('count', () => {
+        it('should count all records in store', () => {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    return db.players.count();
+                })
+                .then((numPlayers) => {
+                    assert.equal(numPlayers, 2);
                 });
         });
     });
