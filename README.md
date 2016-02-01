@@ -2,7 +2,15 @@
 
 Backboard is a thin promise-based wrapper around the IndexedDB API, designed to let you mix promises and IndexedDB without sacrificing performance or writing ridiculously messy code.
 
-The goal is to come up with something like this:
+There are other similar projects, but none of them do quite what I want. They all seem to fall in one of these two categories:
+
+1. They support less features than the raw IndexedDB API, which is not good for a DB-heavy app that is already struggling to deal with IndexedDB's limited feature set.
+
+2. They support extra stuff beyond the raw IndexedDB API, like caching or joins or advanced filtering. That's all great, but then you have this black box sitting between your application and your database, and I don't want a black box potentially interfering with performance or portability or anything like that.
+
+So the goal of Backboard is to expose all of the functionality of IndexedDB with no extra features, just wrapped in a (IMHO) sane promise-based API.
+
+When it's done, it will look something like this:
 
     const Backboard = require('backboard');
 
