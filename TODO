@@ -4,4 +4,6 @@ add getAll to fakeIndexedDB, then use here
 
 more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas
 
+all those _wrapRequest calls in DB.js, not very DRY
+
 test in browsers, particularly the promise race condition stuff

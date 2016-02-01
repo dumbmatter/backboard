@@ -33,7 +33,7 @@ describe('Backboard.open', () => {
     it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
 
     describe('Schema upgrades', () => {
-        beforeEach(function () {
+        beforeEach(() => {
             return Backboard.open('test', schemas)
                 .then((db) => db.close());
         });
@@ -61,7 +61,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then(function (db) {
+                .then((db) => {
                     assert.deepEqual(db.objectStoreNames.sort(), ['games', 'players', 'teams']);
                     db.close();
                 });
@@ -81,7 +81,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then(function (db) {
+                .then((db) => {
                     assert.deepEqual(db.objectStoreNames.sort(), ['players']);
                     db.close();
                 });
@@ -108,7 +108,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then(function (db) {
+                .then((db) => {
                     assert.deepEqual(db.teams.indexNames.sort(), ['foo', 'tid']);
                     db.close();
                 });
@@ -131,7 +131,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then(function (db) {
+                .then((db) => {
                     assert.deepEqual(db.teams.indexNames, []);
                     db.close();
                 });
