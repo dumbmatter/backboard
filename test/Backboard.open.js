@@ -21,7 +21,7 @@ const schemas = [{
 }];
 
 describe('Backboard.open', () => {
-    afterEach(function () {
+    afterEach(() => {
         return Backboard.delete('test');
     });
 

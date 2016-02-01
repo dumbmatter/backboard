@@ -5,7 +5,7 @@ var DB = require('./lib/DB');
 
 class Backboard {
     static open(name, schemas) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             const latestSchema = schemas[schemas.length - 1];
 
             const request = indexedDB.open(name, latestSchema.version);
@@ -17,7 +17,7 @@ class Backboard {
     }
 
     static delete(name) {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             const request = indexedDB.deleteDatabase(name);
             request.onerror = (event) => reject(event.target.error);
             request.onblocked = () => resolve(); // http://stackoverflow.com/a/27871590/786644
