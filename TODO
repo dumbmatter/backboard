@@ -1,5 +1,3 @@
-delete/clear
-
 iterate
 
 add getAll to fakeIndexedDB, then use here

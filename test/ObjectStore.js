@@ -97,6 +97,25 @@ describe('ObjectStore', () => {
         });
     });
 
+    describe('clear', () => {
+        it('should delete all records in store', () => {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    return db.players.clear();
+                })
+                .then(() => {
+                    return db.players.count();
+                })
+                .then((numPlayers) => {
+                    assert.equal(numPlayers, 0);
+                });
+        });
+    });
+
     describe('count', () => {
         it('should count all records in store', () => {
             return db.players.add(player)
@@ -109,6 +128,30 @@ describe('ObjectStore', () => {
                 })
                 .then((numPlayers) => {
                     assert.equal(numPlayers, 2);
+                });
+        });
+    });
+
+    describe('delete', () => {
+        it('should delete record', () => {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    return db.players.delete(4);
+                })
+                .then(() => {
+                    return db.players.count();
+                })
+                .then((numPlayers) => {
+                    assert.equal(numPlayers, 1);
+
+                    return db.players.get(5);
+                })
+                .then((playerFromDb) => {
+                    assert.deepEqual(playerFromDb, player);
                 });
         });
     });
