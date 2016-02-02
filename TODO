@@ -1,6 +1,3 @@
-fix zuul in firefox
-  need another promises library?
-
 Index.iterate
 
 other properties on cursor (which aren't they same for indexes and object stores!)
@@ -12,3 +9,7 @@ more concise schema definition, maybe use version as key of object and then the 
 all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
 
 zuul in CI
+
+use native promises in chrome, not es6-promise - what's a good way to do feature detection?
+
+bluebird instead of es6-promise, for bbgm? or pluggable promise library, somehow?

@@ -3,6 +3,11 @@
 const upgrade = require('./lib/upgrade');
 const DB = require('./lib/DB');
 
+if (typeof window !== 'undefined') {
+    // In browser, need a Promise implementation that uses microtasks - currently only Chrome works with native promises, see https://github.com/jakearchibald/indexeddb-promised#transaction-lifetime
+    window.Promise = require('es6-promise').Promise;
+}
+
 class Backboard {
     static open(name, schemas) {
         return new Promise((resolve, reject) => {
