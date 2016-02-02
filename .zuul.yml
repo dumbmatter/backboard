@@ -11,3 +11,5 @@ browsers:
     version: 10..latest
   - name: microsoftedge
     version: 20..latest
+  - name: safari
+    version: 9..latest

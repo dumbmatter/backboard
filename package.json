@@ -18,7 +18,8 @@
     "lint": "eslint index.js lib/**.js test/**.js",
     "mocha": "mocha --compilers js:babel-register",
     "test": "npm run lint && npm run mocha",
-    "zuul": "zuul --local -- test/**.js"
+    "test-browser": "zuul -- test/**.js",
+    "test-browser-local": "zuul --local -- test/**.js"
   },
   "author": "Jeremy Scheff <jdscheff@gmail.com>",
   "license": "Apache-2.0",
