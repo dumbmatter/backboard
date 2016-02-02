@@ -16,15 +16,15 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint index.js lib/**.js test/**.js",
-    "mocha": "mocha",
+    "mocha": "mocha --compilers js:babel-register",
     "test": "npm run lint && npm run mocha",
     "zuul": "zuul --local -- test/**.js"
   },
   "author": "Jeremy Scheff <jdscheff@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "babel-cli": "^6.4.5",
     "babel-preset-es2015": "^6.3.13",
+    "babel-register": "^6.4.3",
     "babelify": "^7.2.0",
     "eslint": "^1.10.3",
     "fake-indexeddb": "^1.0.3",
