@@ -1,0 +1,4 @@
+ui: mocha-bdd
+browserify:
+  - transform:
+      name: babelify

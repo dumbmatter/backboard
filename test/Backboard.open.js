@@ -61,7 +61,7 @@ describe('Backboard.open', () => {
 
             return Backboard.open('test', newSchemas)
                 .then((db) => {
-                    assert.deepEqual(db.objectStoreNames.sort(), ['games', 'players', 'teams']);
+                    assert.deepEqual([...db.objectStoreNames].sort(), ['games', 'players', 'teams']);
                     db.close();
                 });
         });
@@ -81,7 +81,7 @@ describe('Backboard.open', () => {
 
             return Backboard.open('test', newSchemas)
                 .then((db) => {
-                    assert.deepEqual(db.objectStoreNames.sort(), ['players']);
+                    assert.deepEqual([...db.objectStoreNames].sort(), ['players']);
                     db.close();
                 });
         });
@@ -108,7 +108,7 @@ describe('Backboard.open', () => {
 
             return Backboard.open('test', newSchemas)
                 .then((db) => {
-                    assert.deepEqual(db.teams.indexNames.sort(), ['foo', 'tid']);
+                    assert.deepEqual([...db.teams.indexNames].sort(), ['foo', 'tid']);
                     db.close();
                 });
         });
@@ -131,7 +131,7 @@ describe('Backboard.open', () => {
 
             return Backboard.open('test', newSchemas)
                 .then((db) => {
-                    assert.deepEqual(db.teams.indexNames, []);
+                    assert.equal(db.teams.indexNames.length, 0);
                     db.close();
                 });
         });
