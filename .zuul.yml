@@ -2,3 +2,12 @@ ui: mocha-bdd
 browserify:
   - transform:
       name: babelify
+browsers:
+  - name: chrome
+    version: 47..latest
+  - name: firefox
+    version: 43..latest
+  - name: ie
+    version: 10..latest
+  - name: microsoftedge
+    version: 20..latest
