@@ -96,80 +96,64 @@ describe('Index', () => {
         it('should iterate over all records in store', () => {
             let count = 0;
             const tids = [1, 2, 3, 4, 5];
-            const options = {
-                callback: (player) => {
-                    assert.equal(player.tid, tids[count]);
-                    count++;
-                }
+            const cb = (player) => {
+                assert.equal(player.tid, tids[count]);
+                count++;
             };
-            return db.players.index('tid').iterate(options)
+            return db.players.index('tid').iterate(cb)
                 .then(() => assert.equal(count, tids.length));
         });
 
         it('should iterate over all records in store in reverse', () => {
             let count = 0;
             const tids = [5, 4, 3, 2, 1];
-            const options = {
-                direction: 'prev',
-                callback: (player) => {
-                    assert.equal(player.tid, tids[count]);
-                    count++;
-                }
+            const cb = (player) => {
+                assert.equal(player.tid, tids[count]);
+                count++;
             };
-            return db.players.index('tid').iterate(options)
+            return db.players.index('tid').iterate('prev', cb)
                 .then(() => assert.equal(count, tids.length));
         });
 
         it('should iterate over records starting with key', () => {
             let count = 0;
             const tids = [3, 4, 5];
-            const options = {
-                key: Backboard.lowerBound(3),
-                callback: (player) => {
-                    assert.equal(player.tid, tids[count]);
-                    count++;
-                }
+            const cb = (player) => {
+                assert.equal(player.tid, tids[count]);
+                count++;
             };
-            return db.players.index('tid').iterate(options)
+            return db.players.index('tid').iterate(Backboard.lowerBound(3), cb)
                 .then(() => assert.equal(count, tids.length));
         });
 
         it('should short circuit', () => {
             let count = 0;
-            const options = {
-                callback: (player, shortCircuit) => {
-                    shortCircuit();
-                    count++;
-                }
+            const cb = (player, shortCircuit) => {
+                shortCircuit();
+                count++;
             };
-            return db.players.index('tid').iterate(options)
+            return db.players.index('tid').iterate(cb)
                 .then(() => assert.equal(count, 1));
         });
 
         it('should update when callback returns an object', () => {
             const tx = db.tx('players', 'readwrite');
-            const options = {
-                key: 3,
-                callback: (player) => {
-                    player.updated = true;
-                    return player;
-                }
+            const cb = (player) => {
+                player.updated = true;
+                return player;
             };
-            return tx.players.index('tid').iterate(options)
+            return tx.players.index('tid').iterate(3, cb)
                 .then(() => tx.players.index('tid').get(3))
                 .then((player) => assert.equal(player.updated, true));
         });
 
         it('should update when callback resolves to an object', () => {
             const tx = db.tx('players', 'readwrite');
-            const options = {
-                key: 3,
-                callback: (player) => {
-                    player.updated = true;
-                    return Promise.resolve(player);
-                }
+            const cb = (player) => {
+                player.updated = true;
+                return Promise.resolve(player);
             };
-            return tx.players.index('tid').iterate(options)
+            return tx.players.index('tid').iterate(3, cb)
                 .then(() => tx.players.index('tid').get(3))
                 .then((player) => assert.equal(player.updated, true));
         });
@@ -177,17 +161,14 @@ describe('Index', () => {
         it('should advance over multiple records', () => {
             let count = 0;
             const tids = [5, 4, 1];
-            const options = {
-                direction: 'prev',
-                callback: (player, shortCircuit, advance) => {
-                    assert.equal(player.tid, tids[count]);
-                    if (count === 1) {
-                        advance(3);
-                    }
-                    count++;
+            const cb = (player, shortCircuit, advance) => {
+                assert.equal(player.tid, tids[count]);
+                if (count === 1) {
+                    advance(3);
                 }
+                count++;
             };
-            return db.players.index('tid').iterate(options)
+            return db.players.index('tid').iterate('prev', cb)
                 .then(() => assert.equal(count, tids.length));
         });
     });

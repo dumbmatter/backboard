@@ -1,15 +1,23 @@
+would a better iterate API be db.players.iterate(key, cb) and db.players.iterate(key, direction, cb)?
+
 other properties on cursor (which aren't they same for indexes and object stores!)
 
 add getAll to fakeIndexedDB, then use here
+  why not use shim?
 
 more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas and you have to parse the string into a number
 
 all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
 
-use native promises in chrome, not es6-promise - what's a good way to do feature detection?
+use native promises by default if they work with microtasks (node, chrome) and something else otherwise (es6-promise in firefox, not sure in IE)
+  how?? maybe make it all manual, put es6-promise as a dependency and try the tx thing that fails. apply es6 and try again. if it still fails (IE) then give up or try yet another
+    but then if i wanted to use bluebird, i'd still have es6-promise included in the build
 
 fix in IE - promise transaction issue
+  no: https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
 
 bluebird instead of es6-promise, for bbgm? or pluggable promise library, somehow?
+  Backboard.setPromiseConstructor(Bluebird)
 
-es6 modules
+better documentation
+  iterate arg order
