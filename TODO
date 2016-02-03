@@ -1,5 +1,3 @@
-Index.iterate
-
 other properties on cursor (which aren't they same for indexes and object stores!)
 
 add getAll to fakeIndexedDB, then use here
@@ -13,3 +11,5 @@ use native promises in chrome, not es6-promise - what's a good way to do feature
 fix in IE - promise transaction issue
 
 bluebird instead of es6-promise, for bbgm? or pluggable promise library, somehow?
+
+es6 modules
