@@ -1,5 +1,3 @@
-'use strict';
-
 const upgrade = require('./lib/upgrade');
 const DB = require('./lib/DB');
 

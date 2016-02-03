@@ -19,3 +19,4 @@ bluebird instead of es6-promise, for bbgm? or pluggable promise library, somehow
 
 better documentation
   iterate arg order
+  https://github.com/jakearchibald/indexeddb-promised is similar
