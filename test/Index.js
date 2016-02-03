@@ -63,7 +63,7 @@ describe('Index', () => {
                     player.pid = 5;
                     return db.players.add(player);
                 })
-                .then(() => db.players.index('tid').count())
+                .then(() => db.players.index('tid').count(1))
                 .then((numPlayers) => assert.equal(numPlayers, 2));
         });
     });

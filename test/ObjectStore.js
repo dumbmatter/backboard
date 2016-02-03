@@ -99,7 +99,7 @@ describe('ObjectStore', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.clear())
-                .then(() => db.players.count())
+                .then(() => db.players.count(Backboard.lowerBound(0)))
                 .then((numPlayers) => assert.equal(numPlayers, 0));
         });
     });
@@ -111,7 +111,7 @@ describe('ObjectStore', () => {
                     player.pid = 5;
                     return db.players.add(player);
                 })
-                .then(() => db.players.count())
+                .then(() => db.players.count(Backboard.lowerBound(0)))
                 .then((numPlayers) => assert.equal(numPlayers, 2));
         });
     });
@@ -124,7 +124,7 @@ describe('ObjectStore', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.delete(4))
-                .then(() => db.players.count())
+                .then(() => db.players.count(Backboard.lowerBound(0)))
                 .then((numPlayers) => {
                     assert.equal(numPlayers, 1);
 

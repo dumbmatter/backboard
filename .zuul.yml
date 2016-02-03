@@ -7,9 +7,3 @@ browsers:
     version: 47..latest
   - name: firefox
     version: 43..latest
-  - name: ie
-    version: 10..latest
-  - name: microsoftedge
-    version: 20..latest
-  - name: safari
-    version: 9..latest

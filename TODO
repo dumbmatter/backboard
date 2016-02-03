@@ -8,11 +8,8 @@ more concise schema definition, maybe use version as key of object and then the 
 
 all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
 
-zuul in CI
-  https://github.com/defunctzombie/zuul/wiki/Travis-ci
-  node_modules/.bin/zuul -- test/**.js will run in sauce now
-  https://github.com/nolanlawson/pseudo-worker/blob/master/.travis.yml
-
 use native promises in chrome, not es6-promise - what's a good way to do feature detection?
+
+fix in IE - promise transaction issue
 
 bluebird instead of es6-promise, for bbgm? or pluggable promise library, somehow?
