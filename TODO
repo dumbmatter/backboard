@@ -1,4 +1,42 @@
-other properties on cursor (which aren't they same for indexes and object stores!)
+properties to pass through from idb:
+  DB.name
+  DB.version
+  ObjectStore.name
+  ObjectStore.keyPath
+  ObjectStore.autoIncrement
+  Index.name
+  Index.objectStore
+  Index.keyPath
+  Index.multiEntry
+  Index.unique
+  Transaction.mode
+  Transaction.db
+  Transaction.error
+  Transaction.abort
+
+event listeners, do they matter?
+  DB.onabort
+  DB.onerror
+  DB.onversionchange
+  Transaction.onabort
+  Transaction.onerror
+
+Should *.onabort be an error, or what? how do other libraries handle it?
+
+Index.openKeyCursor
+
+Index.getKey
+
+other properties on cursor
+  Cursor.source
+  Cursor.direction
+  Cursor.key
+  Cursor.primaryKey
+  Cursor.update()
+  Cursor.advance()
+  Cursor.continue()
+  Cursor.delete()
+  Cursor.value
 
 add getAll to fakeIndexedDB, then use here
   why not use shim?
@@ -7,16 +45,20 @@ more concise schema definition, maybe use version as key of object and then the 
 
 all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
 
-use native promises by default if they work with microtasks (node, chrome) and something else otherwise (es6-promise in firefox, not sure in IE)
-  how?? maybe make it all manual, put es6-promise as a dependency and try the tx thing that fails. apply es6 and try again. if it still fails (IE) then give up or try yet another
-    but then if i wanted to use bluebird, i'd still have es6-promise included in the build
+Backboard.setPromiseConstructor
+  fix in IE - promise transaction issue
+    no: https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
+    maybe: https://github.com/dfahlander/Dexie.js/wiki/Promise#implementation-details says it works in IE
+  try bluebird current version with other scheduler
+    such as https://github.com/jakearchibald/es6-promise/blob/master/lib/es6-promise/asap.js
+  what promise library (if any) should be shipped by default?
 
-fix in IE - promise transaction issue
-  no: https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
-
-bluebird instead of es6-promise, for bbgm? or pluggable promise library, somehow?
-  Backboard.setPromiseConstructor(Bluebird)
+better way of passing Backboard around to stuff in lib
 
 better documentation
   iterate arg order
-  https://github.com/jakearchibald/indexeddb-promised is similar
+  similar to
+    https://github.com/jakearchibald/indexeddb-promised
+    dexie
+  but slightly nicer API, pluggable promise library
+  feature detection in root.js - abstract into lib function, put in documentation

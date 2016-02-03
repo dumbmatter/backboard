@@ -1,14 +1,9 @@
 const upgrade = require('./lib/upgrade');
 const DB = require('./lib/DB');
 
-if (typeof window !== 'undefined') {
-    // In browser, need a Promise implementation that uses microtasks - currently only Chrome works with native promises, see https://github.com/jakearchibald/indexeddb-promised#transaction-lifetime
-    window.Promise = require('es6-promise').Promise;
-}
-
 class Backboard {
     static open(name, schemas) {
-        return new Promise((resolve, reject) => {
+        return new Backboard.Promise((resolve, reject) => {
             const latestSchema = schemas[schemas.length - 1];
 
             const request = indexedDB.open(name, latestSchema.version);
@@ -20,13 +15,17 @@ class Backboard {
     }
 
     static delete(name) {
-        return new Promise((resolve, reject) => {
+        return new Backboard.Promise((resolve, reject) => {
             const request = indexedDB.deleteDatabase(name);
             request.onerror = (event) => reject(event.target.error);
             request.onblocked = () => resolve(); // http://stackoverflow.com/a/27871590/786644
             request.onupgradeneeded = () => reject(new Error('Unexpected upgradeneeded event'));
             request.onsuccess = () => resolve();
         });
+    }
+
+    static setPromiseConstructor(PromiseConstructor) {
+        Backboard.Promise = PromiseConstructor;
     }
 
     static lowerBound() {
@@ -42,5 +41,6 @@ class Backboard {
         return IDBKeyRange.bound.apply(IDBKeyRange, arguments);
     }
 }
+Backboard.Promise = Promise;
 
 module.exports = Backboard;

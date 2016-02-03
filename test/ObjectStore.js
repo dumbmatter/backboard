@@ -212,7 +212,7 @@ describe('ObjectStore', () => {
             return tx.players
                 .iterate(6, (player) => {
                     player.updated = true;
-                    return Promise.resolve(player);
+                    return Backboard.Promise.resolve(player);
                 })
                 .then(() => tx.players.get(6))
                 .then((player) => assert.equal(player.updated, true));

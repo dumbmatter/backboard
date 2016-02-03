@@ -150,7 +150,7 @@ describe('Index', () => {
             return tx.players.index('tid')
                 .iterate(3, (player) => {
                     player.updated = true;
-                    return Promise.resolve(player);
+                    return Backboard.Promise.resolve(player);
                 })
                 .then(() => tx.players.index('tid').get(3))
                 .then((player) => assert.equal(player.updated, true));
