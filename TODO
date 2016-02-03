@@ -1,5 +1,3 @@
-would a better iterate API be db.players.iterate(key, cb) and db.players.iterate(key, direction, cb)?
-
 other properties on cursor (which aren't they same for indexes and object stores!)
 
 add getAll to fakeIndexedDB, then use here

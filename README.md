@@ -100,22 +100,23 @@ When it's done, it will look something like this:
         })
         .then(() => {
             // No more cursors!
-            return db.players.index('tid').iterate(Backboard.lowerBound(0), 'next', (p, shortCircuit, advance) => {
-                // Skip ahead next iteration, same as cursor.advance
-                if (p.pid === 2) {
-                    advance(5);
-                }
+            return db.players.index('tid')
+                .iterate(Backboard.lowerBound(0), 'next', (p, shortCircuit, advance) => {
+                    // Skip ahead next iteration, same as cursor.advance
+                    if (p.pid === 2) {
+                        advance(5);
+                    }
 
-                // Use the shortCircuit function to stop iteration after this callback runs
-                if (p.pid > 10) {
-                    shortCircuit();
-                }
+                    // Use the shortCircuit function to stop iteration after this callback runs
+                    if (p.pid > 10) {
+                        shortCircuit();
+                    }
 
-                // Return undefined (or nothing) and it'll just go to the next object
-                // Return a value (or a promise that resolves to a value) and it'll replace the object in the database
-                p.foo = 'updated';
-                return p;
-            });
+                    // Return undefined (or nothing) and it'll just go to the next object
+                    // Return a value (or a promise that resolves to a value) and it'll replace the object in the database
+                    p.foo = 'updated';
+                    return p;
+                });
         })
         .then(() => {
             // Other IndexedDB functions are present too
