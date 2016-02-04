@@ -1,9 +1,5 @@
 event listeners, do they matter?
-  DB.onabort
-  DB.onerror
   DB.onversionchange
-  Transaction.onabort
-  Transaction.onerror
 
 Should *.onabort be an error, or what? how do other libraries handle it?
 
@@ -27,7 +23,7 @@ add getAll to fakeIndexedDB, then use here
 
 more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas and you have to parse the string into a number
 
-all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
+all those _wrapRequest calls (and definition) in DB.js and keyrange calls in index.js, not very DRY
 
 what promise library (if any) should be shipped by default?
 
