@@ -1,14 +1,6 @@
 properties to pass through from idb:
   DB.name
   DB.version
-  ObjectStore.name
-  ObjectStore.keyPath
-  ObjectStore.autoIncrement
-  Index.name
-  Index.objectStore
-  Index.keyPath
-  Index.multiEntry
-  Index.unique
   Transaction.mode
   Transaction.db
   Transaction.error

@@ -232,4 +232,22 @@ describe('ObjectStore', () => {
                 .then(() => assert.equal(count, pids.length));
         });
     });
+
+    describe('constants', () => {
+        it('autoIncrement', () => {
+            assert.equal(db.players.autoIncrement, true);
+        });
+
+        it('indexNames', () => {
+            assert.deepEqual([...db.players.indexNames], ['tid']);
+        });
+
+        it('keyPath', () => {
+            assert.equal(db.players.keyPath, 'pid');
+        });
+
+        it('name', () => {
+            assert.equal(db.players.name, 'players');
+        });
+    });
 });

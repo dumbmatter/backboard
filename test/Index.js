@@ -170,4 +170,26 @@ describe('Index', () => {
                 .then(() => assert.equal(count, tids.length));
         });
     });
+
+    describe('constants', () => {
+        it('keyPath', () => {
+            assert.equal(db.players.index('tid').keyPath, 'tid');
+        });
+
+        it('multiEntry', () => {
+            assert.equal(db.players.index('tid').multiEntry, false);
+        });
+
+        it('name', () => {
+            assert.equal(db.players.index('tid').name, 'tid');
+        });
+
+        it('objectStore', () => {
+            assert.equal(db.players.index('tid').objectStore.name, 'players');
+        });
+
+        it('unique', () => {
+            assert.equal(db.players.index('tid').unique, false);
+        });
+    });
 });
