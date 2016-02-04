@@ -1,6 +1,3 @@
-properties to pass through from idb:
-  Transaction.abort
-
 event listeners, do they matter?
   DB.onabort
   DB.onerror

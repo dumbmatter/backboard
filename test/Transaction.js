@@ -62,6 +62,24 @@ describe('Transaction', () => {
             .catch((err) => assert.equal(err.name, 'TransactionInactiveError'));
     });
 
+    it('should abort transaction on Transaction.abort() call', () => {
+        const tx = db.tx('players', 'readwrite');
+        tx.players.put(player);
+
+        return tx.players.get(4)
+            .then((player) => {
+                assert.equal(player.pid, 4);
+
+                tx.abort();
+
+                return db.players.get(4);
+            })
+            .then((player) => {
+                assert.equal(player, undefined);
+                assert.equal(tx.error, null);
+            });
+    });
+
     describe('properties', () => {
         it('db', () => {
             const tx = db.tx('players', 'readwrite');
