@@ -45,13 +45,7 @@ more concise schema definition, maybe use version as key of object and then the 
 
 all those _wrapRequest calls in DB.js and keyrange calls in index.js, not very DRY
 
-Backboard.setPromiseConstructor
-  fix in IE - promise transaction issue
-    no: https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/
-    maybe: https://github.com/dfahlander/Dexie.js/wiki/Promise#implementation-details says it works in IE
-  try bluebird current version with other scheduler
-    such as https://github.com/jakearchibald/es6-promise/blob/master/lib/es6-promise/asap.js
-  what promise library (if any) should be shipped by default?
+what promise library (if any) should be shipped by default?
 
 better way of passing Backboard around to stuff in lib
 

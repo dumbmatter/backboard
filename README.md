@@ -126,3 +126,27 @@ When it's done, it will look something like this:
                 .then((numTeams) => console.log(numTeams))
                 .then(() => db.teams.clear());
         });
+
+## Browser compatibility
+
+It's a bit tricky due to [the interaction between promises and IndexedDB transactions](https://jakearchibald.com/2015/tasks-microtasks-queues-and-schedules/). The current (early 2016) situation is:
+
+**Chrome**: works out of the box.
+
+**Firefox**: works if you use a third-party promises library that resolves promises with microtasks. Bluebird and es6-promise seem to work, and you can make Backboard use them by doing
+
+    Backboard.setPromiseConstructor(require('Bluebird');
+
+or
+
+    Backboard.setPromiseConstructor(require('es6-promise').Promise);
+
+**Edge/IE**: works only if you use a third-party promises library with synchronous promise resolution (which [is not a good thing](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)). If you want to go down that path, here's how to do it in Bluebird:
+
+    const BPromise = require('bluebird');
+    BPromise.setScheduler((fn) => fn());
+    Backboard.setPromiseConstructor(BPromise);
+
+Also Edge has a buggy IndexedDB implementation in general, so you might run into errors caused by that.
+
+**Safari**: [who the fuck knows.](http://www.raymondcamden.com/2014/09/25/IndexedDB-on-iOS-8-Broken-Bad/)
