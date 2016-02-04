@@ -138,5 +138,29 @@ describe('Backboard.open', () => {
 
         it('should recreate index if options change'); // How to test this? Need to actually use feature of Index, or read index.multiEntry property (need to expose it first, though)
         it('should run upgradeFunction if present');
+
+        it.skip('should gracefully handle upgrades when multiple database connections are open', () => {
+            const newSchemas = schemas.concat({
+                version: 2,
+                objectStores: {
+                    players: {
+                        options: {keyPath: 'pid', autoIncrement: true},
+                        indexes: {
+                            tid: {keyPath: 'tid'}
+                        }
+                    }
+                }
+            });
+
+            return Backboard.open('test', schemas)
+                .then((db) => {
+                    db.onerror = () => {};
+
+                    return Backboard.open('test', newSchemas)
+                        .then((db2) => {
+                            db2.close();
+                        });
+                });
+        });
     });
 });

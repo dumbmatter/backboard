@@ -1,7 +1,13 @@
-event listeners, do they matter?
-  DB.onversionchange
+event listeners
+  allow listening to transaction and db errors, because those could come back after promise resolves
+    db.onerror
+    db.onversionchange
+    tx.onerror
+    tx.onabort
+  or make them promises like tx.complete()??? would have to rename to tx.oncomplete() to remove conflict with tx.abort()
+  or just map them right through to the underlying objects, with getters and setters
 
-Should *.onabort be an error, or what? how do other libraries handle it?
+Better tests for transaction abort, and bubbling to db abort event
 
 Index.openKeyCursor
 
