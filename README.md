@@ -135,7 +135,7 @@ It's a bit tricky due to [the interaction between promises and IndexedDB transac
 
 **Firefox**: works if you use a third-party promises library that resolves promises with microtasks. Bluebird and es6-promise seem to work, and you can make Backboard use them by doing
 
-    Backboard.setPromiseConstructor(require('Bluebird');
+    Backboard.setPromiseConstructor(require('Bluebird'));
 
 or
 
