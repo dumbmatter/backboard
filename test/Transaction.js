@@ -61,4 +61,24 @@ describe('Transaction', () => {
             .then(assert.fail)
             .catch((err) => assert.equal(err.name, 'TransactionInactiveError'));
     });
+
+    describe('properties', () => {
+        it('db', () => {
+            const tx = db.tx('players', 'readwrite');
+            assert.equal(tx.db.name, 'test');
+        });
+
+        it('error', () => {
+            const tx = db.tx('players');
+            assert.equal(tx.error, null);
+        });
+
+        it('mode', () => {
+            const tx = db.tx('players', 'readwrite');
+            assert.equal(tx.mode, 'readwrite');
+
+            const tx2 = db.tx('players');
+            assert.equal(tx2.mode, 'readonly');
+        });
+    });
 });

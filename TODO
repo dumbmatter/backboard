@@ -1,7 +1,4 @@
 properties to pass through from idb:
-  Transaction.mode
-  Transaction.db
-  Transaction.error
   Transaction.abort
 
 event listeners, do they matter?
