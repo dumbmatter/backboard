@@ -171,7 +171,7 @@ describe('Index', () => {
         });
     });
 
-    describe('constants', () => {
+    describe('properties', () => {
         it('keyPath', () => {
             assert.equal(db.players.index('tid').keyPath, 'tid');
         });

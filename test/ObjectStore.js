@@ -233,7 +233,7 @@ describe('ObjectStore', () => {
         });
     });
 
-    describe('constants', () => {
+    describe('properties', () => {
         it('autoIncrement', () => {
             assert.equal(db.players.autoIncrement, true);
         });

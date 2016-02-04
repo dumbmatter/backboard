@@ -1,6 +1,4 @@
 properties to pass through from idb:
-  DB.name
-  DB.version
   Transaction.mode
   Transaction.db
   Transaction.error
