@@ -1,28 +1,27 @@
 event listeners
   allow listening to transaction and db errors, because those could come back after promise resolves
+    db.onabort
     db.onerror
     db.onversionchange
     tx.onerror
     tx.onabort
-  or make them promises like tx.complete()??? would have to rename to tx.oncomplete() to remove conflict with tx.abort()
-  or just map them right through to the underlying objects, with getters and setters
+  for bbgm, need to be able to listen to abort events to show user message on quota error
+  for tx.onerror and tx.onabort, could just reject complete promise
+    better syntax might have db.tx('players', (tx) { use tx; }).then/catch, and have abort and error both reject
+  allow bubbling of errors and allow listening to db.onabort, db.onerror, and db.onversionchange somehow
+    currently disabled bubbling in some places
+    default error handlers?
+  inside tx don't need to return promise chain, but you should for error handling
+    but if we re-enabled bubbling there, it would be fine, right?
+    should ideally be so that if it's explicitly caught at get/put/add, it shouldn't bubble to transaction, and if it's caught at transaction it shouldn't bubble to db. is that possible?
 
-Better tests for transaction abort, and bubbling to db abort event
+Better tests for transaction abort/error, and bubbling to db abort event
 
-Index.openKeyCursor
+Index.openKeyCursor? maybe skip
 
 Index.getKey
 
-other properties on cursor
-  Cursor.source
-  Cursor.direction
-  Cursor.key
-  Cursor.primaryKey
-  Cursor.update()
-  Cursor.advance()
-  Cursor.continue()
-  Cursor.delete()
-  Cursor.value
+get rid of iterate advance feature. if anyone needs more cursor functions, should implement a more direct translation of cursor API like indexeddb-promised
 
 add getAll to fakeIndexedDB, then use here
   why not use shim?
@@ -38,7 +37,9 @@ better way of passing Backboard around to stuff in lib
 better documentation
   iterate arg order
   similar to
-    https://github.com/jakearchibald/indexeddb-promised
+    https://github.com/jakearchibald/indexeddb-promised but a bit more idiosyncratic
     dexie
-  but slightly nicer API, pluggable promise library
+  but slightly nicer API, pluggable promise library, error handling
   feature detection in root.js - abstract into lib function, put in documentation
+
+eslint indent won't work because it can't handle double indented function in argument to function that returns promise

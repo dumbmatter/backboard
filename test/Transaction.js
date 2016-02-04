@@ -40,63 +40,68 @@ describe('Transaction', () => {
         return Backboard.delete('test');
     });
 
-    describe('complete', () => {
-        it('should resolve after transaction completes', () => {
-            const tx = db.tx('players', 'readwrite');
-            tx.players.put(player);
-            player.name = 'Updated';
-            tx.players.put(player);
-
-            return tx.complete()
-                .then(() => db.players.get(4))
-                .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
-        });
+    it('should resolve after transaction completes', () => {
+        return db.tx('players', 'readwrite', (tx) => {
+                tx.players.put(player);
+                player.name = 'Updated';
+                tx.players.put(player);
+            })
+            .then(() => db.players.get(4))
+            .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
     });
 
     it('should have some kind of error when using a completed transaction', () => {
-        const tx = db.tx('players', 'readwrite');
-
-        return tx.complete()
+        let tx;
+        return db.tx('players', 'readwrite', (txLocal) => {
+                tx = txLocal;
+            })
             .then(() => tx.players.get(4))
             .then(assert.fail)
             .catch((err) => assert.equal(err.name, 'TransactionInactiveError'));
     });
 
     it('should abort transaction on Transaction.abort() call', () => {
-        const tx = db.tx('players', 'readwrite');
-        tx.players.put(player);
+        return db.tx('players', 'readwrite', (tx) => {
+            tx.players.put(player);
 
-        return tx.players.get(4)
-            .then((player) => {
-                assert.equal(player.pid, 4);
+            return tx.players.get(4)
+                .then((player) => {
+                    assert.equal(player.pid, 4);
 
-                tx.abort();
+                    tx.abort();
 
-                return db.players.get(4);
-            })
-            .then((player) => {
-                assert.equal(player, undefined);
-                assert.equal(tx.error, null);
-            });
+                    return db.players.get(4);
+                })
+                .then((player) => {
+                    assert.equal(player, undefined);
+                    assert.equal(tx.error, null);
+                });
+        });
     });
 
     describe('properties', () => {
         it('db', () => {
-            const tx = db.tx('players', 'readwrite');
-            assert.equal(tx.db.name, 'test');
+            return db.tx('players', 'readwrite', (tx) => {
+                assert.equal(tx.db.name, 'test');
+            });
         });
 
         it('error', () => {
-            const tx = db.tx('players');
-            assert.equal(tx.error, null);
+            return db.tx('players', (tx) => {
+                assert.equal(tx.error, null);
+            });
         });
 
         it('mode', () => {
-            const tx = db.tx('players', 'readwrite');
-            assert.equal(tx.mode, 'readwrite');
+            const p1 = db.tx('players', 'readwrite', (tx) => {
+                assert.equal(tx.mode, 'readwrite');
+            });
 
-            const tx2 = db.tx('players');
-            assert.equal(tx2.mode, 'readonly');
+            const p2 = db.tx('players', (tx2) => {
+                assert.equal(tx2.mode, 'readonly');
+            });
+
+            return Promise.all([p1, p2]);
         });
     });
 });

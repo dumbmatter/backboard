@@ -64,28 +64,30 @@ describe('ObjectStore', () => {
 
     describe('put (transaction API)', () => {
         it('should add a new record to the database', () => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players.put(player)
-                .then((key) => {
-                    assert.equal(key, 4);
-                    return tx.players.get(4);
-                })
-                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players.put(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        return tx.players.get(4);
+                    })
+                    .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+            });
         });
 
         it('should update record on key collision', () => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players.put(player)
-                .then((key) => {
-                    assert.equal(key, 4);
-                    player.name = 'Updated';
-                    return tx.players.put(player);
-                })
-                .then((key) => {
-                    assert.equal(key, 4);
-                    return tx.players.get(4);
-                })
-                .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players.put(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        player.name = 'Updated';
+                        return tx.players.put(player);
+                    })
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        return tx.players.get(4);
+                    })
+                    .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
+            });
         });
     });
 
@@ -197,25 +199,27 @@ describe('ObjectStore', () => {
         });
 
         it('should update when callback returns an object', () => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players
-                .iterate(6, (player) => {
-                    player.updated = true;
-                    return player;
-                })
-                .then(() => tx.players.get(6))
-                .then((player) => assert.equal(player.updated, true));
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players
+                    .iterate(6, (player) => {
+                        player.updated = true;
+                        return player;
+                    })
+                    .then(() => tx.players.get(6))
+                    .then((player) => assert.equal(player.updated, true));
+            });
         });
 
         it('should update when callback resolves to an object', () => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players
-                .iterate(6, (player) => {
-                    player.updated = true;
-                    return Backboard.Promise.resolve(player);
-                })
-                .then(() => tx.players.get(6))
-                .then((player) => assert.equal(player.updated, true));
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players
+                    .iterate(6, (player) => {
+                        player.updated = true;
+                        return Backboard.Promise.resolve(player);
+                    })
+                    .then(() => tx.players.get(6))
+                    .then((player) => assert.equal(player.updated, true));
+            });
         });
 
         it('should advance over multiple records', () => {

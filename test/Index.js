@@ -135,25 +135,27 @@ describe('Index', () => {
         });
 
         it('should update when callback returns an object', () => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players.index('tid')
-                .iterate(3, (player) => {
-                    player.updated = true;
-                    return player;
-                })
-                .then(() => tx.players.index('tid').get(3))
-                .then((player) => assert.equal(player.updated, true));
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players.index('tid')
+                    .iterate(3, (player) => {
+                        player.updated = true;
+                        return player;
+                    })
+                    .then(() => tx.players.index('tid').get(3))
+                    .then((player) => assert.equal(player.updated, true));
+            });
         });
 
         it('should update when callback resolves to an object', () => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players.index('tid')
-                .iterate(3, (player) => {
-                    player.updated = true;
-                    return Backboard.Promise.resolve(player);
-                })
-                .then(() => tx.players.index('tid').get(3))
-                .then((player) => assert.equal(player.updated, true));
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players.index('tid')
+                    .iterate(3, (player) => {
+                        player.updated = true;
+                        return Backboard.Promise.resolve(player);
+                    })
+                    .then(() => tx.players.index('tid').get(3))
+                    .then((player) => assert.equal(player.updated, true));
+            });
         });
 
         it('should advance over multiple records', () => {

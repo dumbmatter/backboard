@@ -13,20 +13,21 @@ const checkMicrotaskPromiseResolution = () => {
     }];
     return Backboard.open('test', schemas)
         .then((db) => {
-            const tx = db.tx('players', 'readwrite');
-            return tx.players.put({pid: 4})
-                .then(() => tx.players.get(4)) // If native promise implementation does not use microtasks, this will fail https://github.com/jakearchibald/indexeddb-promised#transaction-lifetime
-                .catch((err) => {
-                    if (err.name === 'TransactionInactiveError') {
-                        bool = false;
-                    } else {
-                        throw err;
-                    }
-                })
-                .then(() => {
-                    db.close();
-                    return Backboard.delete('test');
-                });
+            return db.tx('players', 'readwrite', (tx) => {
+                return tx.players.put({pid: 4})
+                    .then(() => tx.players.get(4)) // If native promise implementation does not use microtasks, this will fail https://github.com/jakearchibald/indexeddb-promised#transaction-lifetime
+                    .catch((err) => {
+                        if (err.name === 'TransactionInactiveError') {
+                            bool = false;
+                        } else {
+                            throw err;
+                        }
+                    })
+                    .then(() => {
+                        db.close();
+                        return Backboard.delete('test');
+                    });
+            });
         })
         .then(() => bool);
 };
