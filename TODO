@@ -11,9 +11,8 @@ event listeners
   allow bubbling of errors and allow listening to db.onabort, db.onerror, and db.onversionchange somehow
     currently disabled bubbling in some places
     default error handlers?
-  inside tx don't need to return promise chain, but you should for error handling
-    but if we re-enabled bubbling there, it would be fine, right?
-    should ideally be so that if it's explicitly caught at get/put/add, it shouldn't bubble to transaction, and if it's caught at transaction it shouldn't bubble to db. is that possible?
+  new idea (since conditional bubbling is probably impossible)
+    since i'm listening to all onerror events in individual requests, can anything possibly happen there for transactions and db?
 
 Better tests for transaction abort/error, and bubbling to db abort event
 
