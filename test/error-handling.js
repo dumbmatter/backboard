@@ -21,7 +21,7 @@ const schemas = [{
 
 let db, player;
 
-describe.only('Error Handling', () => {
+describe('Error Handling', () => {
     beforeEach(() => {
         player = {
             pid: 4,

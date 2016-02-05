@@ -44,13 +44,13 @@ describe('Index', () => {
         it('should allow query by index', () => {
             return db.players.add(player)
                 .then(() => db.players.index('tid').get(1))
-                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+                .then(playerFromDb => assert.deepEqual(playerFromDb, player));
         });
 
         it('should return undefined if no matching key', () => {
             return db.players.add(player)
                 .then(() => db.players.index('tid').get(2))
-                .then((playerFromDb) => assert.equal(playerFromDb, undefined));
+                .then(playerFromDb => assert.equal(playerFromDb, undefined));
         });
     });
 
@@ -62,7 +62,7 @@ describe('Index', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.index('tid').count(1))
-                .then((numPlayers) => assert.equal(numPlayers, 2));
+                .then(numPlayers => assert.equal(numPlayers, 2));
         });
     });
 
@@ -95,7 +95,7 @@ describe('Index', () => {
             let count = 0;
             const tids = [1, 2, 3, 4, 5];
             return db.players.index('tid')
-                .iterate((player) => {
+                .iterate(player => {
                     assert.equal(player.tid, tids[count]);
                     count++;
                 })
@@ -106,7 +106,7 @@ describe('Index', () => {
             let count = 0;
             const tids = [5, 4, 3, 2, 1];
             return db.players.index('tid')
-                .iterate('prev', (player) => {
+                .iterate('prev', player => {
                     assert.equal(player.tid, tids[count]);
                     count++;
                 })
@@ -117,7 +117,7 @@ describe('Index', () => {
             let count = 0;
             const tids = [3, 4, 5];
             return db.players.index('tid')
-                .iterate(Backboard.lowerBound(3), (player) => {
+                .iterate(Backboard.lowerBound(3), player => {
                     assert.equal(player.tid, tids[count]);
                     count++;
                 })
@@ -137,24 +137,24 @@ describe('Index', () => {
         it('should update when callback returns an object', () => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players.index('tid')
-                    .iterate(3, (player) => {
+                    .iterate(3, player => {
                         player.updated = true;
                         return player;
                     })
                     .then(() => tx.players.index('tid').get(3))
-                    .then((player) => assert.equal(player.updated, true));
+                    .then(player => assert.equal(player.updated, true));
             });
         });
 
         it('should update when callback resolves to an object', () => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players.index('tid')
-                    .iterate(3, (player) => {
+                    .iterate(3, player => {
                         player.updated = true;
                         return Backboard.Promise.resolve(player);
                     })
                     .then(() => tx.players.index('tid').get(3))
-                    .then((player) => assert.equal(player.updated, true));
+                    .then(player => assert.equal(player.updated, true));
             });
         });
 

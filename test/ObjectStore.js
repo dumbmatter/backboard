@@ -48,7 +48,7 @@ describe('ObjectStore', () => {
 
                     return db.players.get(4);
                 })
-                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+                .then(playerFromDb => assert.deepEqual(playerFromDb, player));
         });
 
         it('should error on key collision', () => {
@@ -70,7 +70,7 @@ describe('ObjectStore', () => {
                         assert.equal(key, 4);
                         return tx.players.get(4);
                     })
-                    .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+                    .then(playerFromDb => assert.deepEqual(playerFromDb, player));
             });
         });
 
@@ -86,7 +86,7 @@ describe('ObjectStore', () => {
                         assert.equal(key, 4);
                         return tx.players.get(4);
                     })
-                    .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
+                    .then(playerFromDb => assert.equal(playerFromDb.name, 'Updated'));
             });
         });
     });
@@ -100,7 +100,7 @@ describe('ObjectStore', () => {
                 })
                 .then(() => db.players.clear())
                 .then(() => db.players.count(Backboard.lowerBound(0)))
-                .then((numPlayers) => assert.equal(numPlayers, 0));
+                .then(numPlayers => assert.equal(numPlayers, 0));
         });
     });
 
@@ -112,7 +112,7 @@ describe('ObjectStore', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.count(Backboard.lowerBound(0)))
-                .then((numPlayers) => assert.equal(numPlayers, 2));
+                .then(numPlayers => assert.equal(numPlayers, 2));
         });
     });
 
@@ -130,7 +130,7 @@ describe('ObjectStore', () => {
 
                     return db.players.get(5);
                 })
-                .then((playerFromDb) => assert.deepEqual(playerFromDb, player));
+                .then(playerFromDb => assert.deepEqual(playerFromDb, player));
         });
     });
 
@@ -159,7 +159,7 @@ describe('ObjectStore', () => {
             let count = 0;
             const pids = [4, 5, 6, 7, 8];
             return db.players
-                .iterate((player) => {
+                .iterate(player => {
                     assert.equal(player.pid, pids[count]);
                     count++;
                 })
@@ -170,7 +170,7 @@ describe('ObjectStore', () => {
             let count = 0;
             const pids = [8, 7, 6, 5, 4];
             return db.players
-                .iterate('prev', (player) => {
+                .iterate('prev', player => {
                     assert.equal(player.pid, pids[count]);
                     count++;
                 })
@@ -181,7 +181,7 @@ describe('ObjectStore', () => {
             let count = 0;
             const pids = [6, 7, 8];
             return db.players
-                .iterate(Backboard.lowerBound(6), (player) => {
+                .iterate(Backboard.lowerBound(6), player => {
                     assert.equal(player.pid, pids[count]);
                     count++;
                 })
@@ -201,24 +201,24 @@ describe('ObjectStore', () => {
         it('should update when callback returns an object', () => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players
-                    .iterate(6, (player) => {
+                    .iterate(6, player => {
                         player.updated = true;
                         return player;
                     })
                     .then(() => tx.players.get(6))
-                    .then((player) => assert.equal(player.updated, true));
+                    .then(player => assert.equal(player.updated, true));
             });
         });
 
         it('should update when callback resolves to an object', () => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players
-                    .iterate(6, (player) => {
+                    .iterate(6, player => {
                         player.updated = true;
                         return Backboard.Promise.resolve(player);
                     })
                     .then(() => tx.players.get(6))
-                    .then((player) => assert.equal(player.updated, true));
+                    .then(player => assert.equal(player.updated, true));
             });
         });
 

@@ -1,11 +1,10 @@
 event listeners
   for bbgm, need to be able to listen to abort events to show user message on quota error. MAKE FUCKING SURE THIS WORKS. i don't want to accidentally cancle propagation of that
   allow bubbling of errors and allow listening to db events somehow
-    currently disabled bubbling in some places
-    default error handlers?
-    db.on('abort', cb) - is this necessary, or just a dupe of tx abort? could prevent bubbling there
-    db.on('error', cb) - if i prevent bubbling at request level, will this ever happen? if not, maybe preventing bubbling makes sense. transactions will still get aborted on any error. as long as i document that behavior, i think it's fine
+    db.on('quotaerror', cb)
     db.on('versionchange', cb)
+      what should behavior be if no cb is supplied, and how should it change if cb is supplied? see dexie
+  how can i unit test quotaerror?
 
 Better tests for transaction abort/error, and bubbling to db abort event
 

@@ -16,7 +16,7 @@ const checkMicrotaskPromiseResolution = () => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players.put({pid: 4})
                     .then(() => tx.players.get(4)) // If native promise implementation does not use microtasks, this will fail https://github.com/jakearchibald/indexeddb-promised#transaction-lifetime
-                    .catch((err) => {
+                    .catch(err => {
                         if (err.name === 'TransactionInactiveError') {
                             bool = false;
                         } else {
@@ -47,7 +47,7 @@ before(() => {
                 Backboard.setPromiseConstructor(require('es6-promise').Promise);
 
                 return checkMicrotaskPromiseResolution()
-                    .then((bool) => {
+                    .then(bool => {
                         if (!bool) {
                             const msg = 'Could not find a promise library that uses microtasks in your environment, so you\'re fucked.';
                             console.log(msg);

@@ -24,7 +24,7 @@ let db;
 describe('DB', () => {
     beforeEach(() => {
         return Backboard.open('test', schemas)
-            .then((dbLocal) => {
+            .then(dbLocal => {
                 db = dbLocal;
             });
     });

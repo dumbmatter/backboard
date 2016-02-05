@@ -47,7 +47,7 @@ describe('Transaction', () => {
                 tx.players.put(player);
             })
             .then(() => db.players.get(4))
-            .then((playerFromDb) => assert.equal(playerFromDb.name, 'Updated'));
+            .then(playerFromDb => assert.equal(playerFromDb.name, 'Updated'));
     });
 
     it('should have some kind of error when using a completed transaction', () => {
@@ -65,18 +65,30 @@ describe('Transaction', () => {
             tx.players.put(player);
 
             return tx.players.get(4)
-                .then((player) => {
+                .then(player => {
                     assert.equal(player.pid, 4);
 
                     tx.abort();
 
                     return db.players.get(4);
                 })
-                .then((player) => {
+                .then(player => {
                     assert.equal(player, undefined);
                     assert.equal(tx.error, null);
                 });
         });
+    });
+
+    it('should error for invalid object store', () => {
+        return db.tx('foo', 'readwrite')
+            .then(assert.fail)
+            .catch(err => assert.equal(err.name, 'NotFoundError'));
+    });
+
+    it('should error for invalid mode', () => {
+        return db.tx('players', 'foo')
+            .then(assert.fail)
+            .catch(err => assert.equal(err.name, 'TypeError'));
     });
 
     describe('properties', () => {
