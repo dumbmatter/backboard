@@ -1,18 +1,9 @@
 event listeners
-  allow listening to transaction and db errors, because those could come back after promise resolves
-    db.onabort
-    db.onerror
-    db.onversionchange
-    tx.onerror
-    tx.onabort
   for bbgm, need to be able to listen to abort events to show user message on quota error
-  for tx.onerror and tx.onabort, could just reject complete promise
-    better syntax might have db.tx('players', (tx) { use tx; }).then/catch, and have abort and error both reject
   allow bubbling of errors and allow listening to db.onabort, db.onerror, and db.onversionchange somehow
     currently disabled bubbling in some places
     default error handlers?
-  new idea (since conditional bubbling is probably impossible)
-    since i'm listening to all onerror events in individual requests, can anything possibly happen there for transactions and db?
+    db.on('abort', cb)
 
 Better tests for transaction abort/error, and bubbling to db abort event
 
@@ -40,5 +31,7 @@ better documentation
     dexie
   but slightly nicer API, pluggable promise library, error handling
   feature detection in root.js - abstract into lib function, put in documentation
+  limitations
+    can't use event.preventDefault() to commit a transaction while ignoring an error in a request. couldn't figure out a good way to do it, and i don't personally use that feature anyway.
 
 eslint indent won't work because it can't handle double indented function in argument to function that returns promise

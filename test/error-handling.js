@@ -21,7 +21,7 @@ const schemas = [{
 
 let db, player;
 
-describe('Error Handling', () => {
+describe.only('Error Handling', () => {
     beforeEach(() => {
         player = {
             pid: 4,
@@ -40,48 +40,35 @@ describe('Error Handling', () => {
         return Backboard.delete('test');
     });
 
-    it('should to transaction if caught in request', () => {
+    it('should propagate error to transaction', () => {
         return db.tx('players', 'readwrite', (tx) => {
-            return tx.players.add(player)
-                .then((key) => {
-                    assert.equal(key, 4);
-                    return tx.players.add(player);
-                })
-                .then(assert.fail)
-                .catch((err) => {
-                    assert.equal(err.name, 'ConstraintError');
-                });
-        });
+                return tx.players.add(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        return tx.players.add(player);
+                    });
+            })
+            .then(assert.fail)
+            .catch(err => assert.equal(err.name, 'ConstraintError'))
+            .then(() => db.players.get(4))
+            .then((player) => assert.equal(player, undefined));
     });
 
-    it('should propagate error to transaction if not caught', () => {
+    it('should propagate error to transaction even if no return inside callback', () => {
         return db.tx('players', 'readwrite', (tx) => {
-            return tx.players.add(player)
-                .then((key) => {
-                    assert.equal(key, 4);
-                    return tx.players.add(player);
-                });
-        })
-        .then(assert.fail)
-        .catch((err) => {
-            assert.equal(err.name, 'ConstraintError');
-        });
+                tx.players.add(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        return tx.players.add(player);
+                    });
+            })
+            .then(assert.fail)
+            .catch(err => assert.equal(err.name, 'ConstraintError'))
+            .then(() => db.players.get(4))
+            .then((player) => assert.equal(player, undefined));
     });
 
-    it.only('should propagate error to transaction even if no return inside transaction', () => {
-        return db.tx('players', 'readwrite', (tx) => {
-            tx.players.add(player)
-                .then((key) => {
-                    assert.equal(key, 4);
-                    return tx.players.add(player);
-                });
-        })
-//        .then(assert.fail)
-        .catch((err) => {
-console.log(err);
-//            assert.equal(err.name, 'ConstraintError');
-        });
-    });
+    it('should propagate abort to database');
 
-    it('should propagate error to database if not caught anywhere');
+    it('should propagate error to database');
 });
