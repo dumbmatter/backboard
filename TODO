@@ -4,7 +4,7 @@ event listeners
     db.on('quotaexceeded', cb)
     db.on('versionchange', cb)
       what should behavior be if no cb is supplied, and how should it change if cb is supplied? see dexie
-  how can i unit test quotaerror?
+    how can i unit test these?
 
 Better tests for transaction abort/error, and bubbling to db abort event
 
@@ -25,6 +25,8 @@ what promise library (if any) should be shipped by default?
 
 better way of passing Backboard around to stuff in lib
 
+break up lib/DB.js into multiple files
+
 better documentation
   iterate arg order
   similar to
@@ -36,6 +38,6 @@ better documentation
   error handling (ideally.. confirm with test)
     if a request fails, it always aborts the transaction. you can't use event.preventDefault() to commit a transaction while ignoring an error in a request. couldn't figure out a good way to do it, and i don't personally use that feature anyway.
     transaction promise rejects on abort. actual errors should be handled at request level
-    db versionchange only
+    db versionchange and quotaexceeded only. versionchange will always close your connection first - if this is not cool for someone, complain and i can make it an option
 
 eslint indent won't work because it can't handle double indented function in argument to function that returns promise
