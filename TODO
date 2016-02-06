@@ -1,3 +1,5 @@
+all those _wrapRequest calls (and definition) in DB.js, not very DRY
+
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
 
@@ -11,8 +13,6 @@ add getAll to fakeIndexedDB, then use here
   why not use shim?
 
 more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas and you have to parse the string into a number
-
-all those _wrapRequest calls (and definition) in DB.js and keyrange calls in index.js, not very DRY
 
 what promise library (if any) should be shipped by default?
 
