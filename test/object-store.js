@@ -125,12 +125,51 @@ describe('ObjectStore', () => {
                 })
                 .then(() => db.players.delete(4))
                 .then(() => db.players.count(Backboard.lowerBound(0)))
-                .then((numPlayers) => {
+                .then(numPlayers => {
                     assert.equal(numPlayers, 1);
 
                     return db.players.get(5);
                 })
                 .then(playerFromDb => assert.deepEqual(playerFromDb, player));
+        });
+    });
+
+    describe('getAll', () => {
+        beforeEach(function () {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    player.pid = 6;
+                    return db.players.add(player);
+                });
+        });
+
+        it('should get all records', () => {
+            return db.players.getAll()
+                .then(players => {
+                    assert.equal(players.length, 3);
+                });
+        });
+
+        it('should work with query parameter', () => {
+            return db.players.getAll(Backboard.lowerBound(5))
+                .then(players => {
+                    assert.equal(players.length, 2);
+                    assert.equal(players[0].pid, 5);
+                    assert.equal(players[1].pid, 6);
+                });
+        });
+
+        it('should work with query and count parameters', () => {
+            return db.players.getAll(null, 2)
+                .then(players => {
+                    assert.equal(players.length, 2);
+                    assert.equal(players[0].pid, 4);
+                    assert.equal(players[1].pid, 5);
+                });
         });
     });
 

@@ -66,6 +66,51 @@ describe('Index', () => {
         });
     });
 
+    describe('getAll', () => {
+        beforeEach(function () {
+            return db.players.add(player)
+                .then(() => {
+                    player.pid = 5;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    player.pid = 6;
+                    return db.players.add(player);
+                })
+                .then(() => {
+                    player.pid = 7;
+                    player.tid = 2;
+                    return db.players.add(player);
+                });
+        });
+
+        it('should get all records', () => {
+            return db.players.index('tid').getAll()
+                .then(players => {
+                    assert.equal(players.length, 4);
+                });
+        });
+
+        it('should work with query parameter', () => {
+            return db.players.index('tid').getAll(1)
+                .then(players => {
+                    assert.equal(players.length, 3);
+                    assert.equal(players[0].pid, 4);
+                    assert.equal(players[1].pid, 5);
+                    assert.equal(players[2].pid, 6);
+                });
+        });
+
+        it('should work with query and count parameters', () => {
+            return db.players.index('tid').getAll(null, 2)
+                .then(players => {
+                    assert.equal(players.length, 2);
+                    assert.equal(players[0].pid, 4);
+                    assert.equal(players[1].pid, 5);
+                });
+        });
+    });
+
     describe('iterate', () => {
         beforeEach(() => {
             return db.players.add(player)

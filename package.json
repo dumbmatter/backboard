@@ -30,6 +30,7 @@
     "es6-promise": "^3.0.2",
     "eslint": "^1.10.3",
     "fake-indexeddb": "^1.0.3",
+    "indexeddb-getall-shim": "^1.2.0",
     "mocha": "^2.4.5",
     "zuul": "^3.9.0"
   },

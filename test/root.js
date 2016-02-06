@@ -36,8 +36,12 @@ before(() => {
     // Use fake-indexeddb if real IndexedDB is not available (Node.js), but use real IndexedDB when possible (browser)
     if (typeof indexedDB === 'undefined') {
         GLOBAL.indexedDB = require('fake-indexeddb');
+        GLOBAL.IDBIndex = require('fake-indexeddb/lib/FDBIndex');
         GLOBAL.IDBKeyRange = require('fake-indexeddb/lib/FDBKeyRange');
+        GLOBAL.IDBObjectStore = require('fake-indexeddb/lib/FDBObjectStore');
     }
+
+    require('indexeddb-getall-shim');
 
     // Would be better like checkMicrotaskPromiseResolution([() => require('es6-promise').Promise, ...])
     return checkMicrotaskPromiseResolution()
