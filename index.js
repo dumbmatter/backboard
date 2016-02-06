@@ -1,8 +1,12 @@
 const upgrade = require('./lib/upgrade');
-const DB = require('./lib/db');
+let DB;
 
 class Backboard {
     static open(name, schemas) {
+        if (!DB) {
+            DB = require('./lib/db');
+        }
+
         return new Backboard.Promise((resolve, reject) => {
             const latestSchema = schemas[schemas.length - 1];
 
