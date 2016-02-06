@@ -1,7 +1,7 @@
 event listeners
   for bbgm, need to be able to listen to abort events to show user message on quota error. MAKE FUCKING SURE THIS WORKS. i don't want to accidentally cancle propagation of that
   allow bubbling of errors and allow listening to db events somehow
-    db.on('quotaerror', cb)
+    db.on('quotaexceeded', cb)
     db.on('versionchange', cb)
       what should behavior be if no cb is supplied, and how should it change if cb is supplied? see dexie
   how can i unit test quotaerror?
