@@ -14,10 +14,6 @@ more concise schema definition, maybe use version as key of object and then the 
 
 what promise library (if any) should be shipped by default?
 
-better way of passing Backboard around to stuff in lib
-
-break up lib/DB.js into multiple files
-
 for bbgm
   need to show user message on quota error. MAKE FUCKING SURE THIS WORKS. i don't want to accidentally cancle propagation of that
 
@@ -35,3 +31,5 @@ better documentation
     db versionchange and quotaexceeded only. you probably do really want to listen to these. versionchange to close, quotaexceeded to do... something
 
 eslint indent won't work because it can't handle double indented function in argument to function that returns promise
+
+would es6 modules help with circular import hacks in object-store.js and index.js?
