@@ -1,5 +1,3 @@
-all those _wrapRequest calls (and definition) in DB.js, not very DRY
-
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
 
