@@ -91,6 +91,34 @@ describe('Transaction', () => {
             .catch(err => assert.equal(err.name, 'TypeError'));
     });
 
+    it('should propagate request error to transaction', () => {
+        return db.tx('players', 'readwrite', (tx) => {
+                return tx.players.add(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        return tx.players.add(player);
+                    });
+            })
+            .then(assert.fail)
+            .catch(err => assert.equal(err.name, 'ConstraintError'))
+            .then(() => db.players.get(4))
+            .then((player) => assert.equal(player, undefined));
+    });
+
+    it('should propagate request error to transaction even if no return inside callback', () => {
+        return db.tx('players', 'readwrite', (tx) => {
+                tx.players.add(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        return tx.players.add(player);
+                    });
+            })
+            .then(assert.fail)
+            .catch(err => assert.equal(err.name, 'ConstraintError'))
+            .then(() => db.players.get(4))
+            .then((player) => assert.equal(player, undefined));
+    });
+
     describe('properties', () => {
         it('db', () => {
             return db.tx('players', 'readwrite', (tx) => {

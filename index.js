@@ -1,5 +1,5 @@
 const upgrade = require('./lib/upgrade');
-const DB = require('./lib/DB');
+const DB = require('./lib/db');
 
 class Backboard {
     static open(name, schemas) {
