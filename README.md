@@ -4,6 +4,8 @@
 
 Backboard is a thin promise-based wrapper around the IndexedDB API, designed to let you mix promises and IndexedDB without sacrificing performance or writing ridiculously messy code.
 
+This part of the README probably needs to be rewritten, but...
+
 There are other similar projects, but none of them do quite what I want. They all seem to fall in one of these two categories:
 
 1. They support less features than the raw IndexedDB API, which is not good for a DB-heavy app that is already struggling to deal with IndexedDB's limited feature set.
@@ -174,7 +176,7 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 
     Also, if a request in a transaction fails, it always aborts the transaction. You can't use `event.preventDefault()` in the request's event handler to still commit the transaction like you can in the raw IndexedDB API. If someone actually uses this feature, we can think about how to add it, but I've never used it.
 
-3. Once the database connection is open, basically no errors propagate down to the database object. There are two exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`s, which happen when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
+3. Once the database connection is open, basically no errors propagate down to the database object. There are two exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`, which happens when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
 
         const cb = event => {
             // Do whatever you want here, such as displaying a notification that this error is probably caused by https://code.google.com/p/chromium/issues/detail?id=488851
