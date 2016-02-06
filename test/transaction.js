@@ -91,32 +91,48 @@ describe('Transaction', () => {
             .catch(err => assert.equal(err.name, 'TypeError'));
     });
 
-    it('should propagate request error to transaction', () => {
-        return db.tx('players', 'readwrite', (tx) => {
-                return tx.players.add(player)
-                    .then((key) => {
-                        assert.equal(key, 4);
-                        return tx.players.add(player);
-                    });
-            })
-            .then(assert.fail)
-            .catch(err => assert.equal(err.name, 'ConstraintError'))
-            .then(() => db.players.get(4))
-            .then((player) => assert.equal(player, undefined));
-    });
+    describe('error propagation', () => {
+        // Weird hack I don't understand for Firefox. Otherwise this triggers window.onerror for some reason, and that causes the test to fail.
+        let originalOnerror;
+        before(() => {
+            if (typeof window !== 'undefined') {
+                originalOnerror = window.onerror;
+                window.onerror = err => console.log(err);
+            }
+        });
+        after(() => {
+            if (typeof window !== 'undefined') {
+                window.onerror = originalOnerror;
+            }
+        });
 
-    it('should propagate request error to transaction even if no return inside callback', () => {
-        return db.tx('players', 'readwrite', (tx) => {
-                tx.players.add(player)
-                    .then((key) => {
-                        assert.equal(key, 4);
-                        return tx.players.add(player);
-                    });
-            })
-            .then(assert.fail)
-            .catch(err => assert.equal(err.name, 'ConstraintError'))
-            .then(() => db.players.get(4))
-            .then((player) => assert.equal(player, undefined));
+        it('should propagate request error to transaction', () => {
+            return db.tx('players', 'readwrite', (tx) => {
+                    return tx.players.add(player)
+                        .then((key) => {
+                            assert.equal(key, 4);
+                            return tx.players.add(player);
+                        });
+                })
+                .then(assert.fail)
+                .catch(err => assert.equal(err.name, 'ConstraintError'))
+                .then(() => db.players.get(4))
+                .then((player) => assert.equal(player, undefined));
+        });
+
+        it('should propagate request error to transaction even if no return inside callback', () => {
+            return db.tx('players', 'readwrite', (tx) => {
+                    tx.players.add(player)
+                        .then((key) => {
+                            assert.equal(key, 4);
+                            return tx.players.add(player);
+                        });
+                })
+                .then(assert.fail)
+                .catch(err => assert.equal(err.name, 'ConstraintError'))
+                .then(() => db.players.get(4))
+                .then((player) => assert.equal(player, undefined));
+        });
     });
 
     describe('properties', () => {
