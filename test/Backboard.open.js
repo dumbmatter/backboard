@@ -26,7 +26,7 @@ describe('Backboard.open', () => {
 
     it('should create object stores', () => {
         return Backboard.open('test', schemas)
-            .then((db) => db.close());
+            .then(db => db.close());
     });
 
     it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
@@ -34,7 +34,7 @@ describe('Backboard.open', () => {
     describe('Schema upgrades', () => {
         beforeEach(() => {
             return Backboard.open('test', schemas)
-                .then((db) => db.close());
+                .then(db => db.close());
         });
 
         it('should create new object store', () => {
@@ -60,7 +60,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then((db) => {
+                .then(db => {
                     assert.deepEqual([...db.objectStoreNames].sort(), ['games', 'players', 'teams']);
                     db.close();
                 });
@@ -80,7 +80,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then((db) => {
+                .then(db => {
                     assert.deepEqual([...db.objectStoreNames].sort(), ['players']);
                     db.close();
                 });
@@ -107,7 +107,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then((db) => {
+                .then(db => {
                     assert.deepEqual([...db.teams.indexNames].sort(), ['foo', 'tid']);
                     db.close();
                 });
@@ -130,7 +130,7 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', newSchemas)
-                .then((db) => {
+                .then(db => {
                     assert.equal(db.teams.indexNames.length, 0);
                     db.close();
                 });
@@ -139,7 +139,7 @@ describe('Backboard.open', () => {
         it('should recreate index if options change'); // How to test this? Need to actually use feature of Index, or read index.multiEntry property (need to expose it first, though)
         it('should run upgradeFunction if present');
 
-        it.skip('should gracefully handle upgrades when multiple database connections are open', () => {
+        it('should gracefully handle upgrades when multiple database connections are open', () => {
             const newSchemas = schemas.concat({
                 version: 2,
                 objectStores: {
@@ -153,13 +153,22 @@ describe('Backboard.open', () => {
             });
 
             return Backboard.open('test', schemas)
-                .then((db) => {
-                    db.onerror = () => {};
+                .then(db => {
+                    assert.equal(db.version, 1);
+
+                    let versionchangeCount = 0;
+
+                    db.on('versionchange', () => {
+                        versionchangeCount += 1;
+                        db.close();
+                    });
 
                     return Backboard.open('test', newSchemas)
-                        .then((db2) => {
+                        .then(db2 => {
+                            assert.equal(db2.version, 2);
                             db2.close();
-                        });
+                        })
+                        .then(() => assert.equal(versionchangeCount, 1));
                 });
         });
     });
