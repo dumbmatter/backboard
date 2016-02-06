@@ -41,7 +41,7 @@ describe('Transaction', () => {
     });
 
     it('should resolve after transaction completes', () => {
-        return db.tx('players', 'readwrite', (tx) => {
+        return db.tx('players', 'readwrite', tx => {
                 tx.players.put(player);
                 player.name = 'Updated';
                 tx.players.put(player);
@@ -61,7 +61,7 @@ describe('Transaction', () => {
     });
 
     it('should abort transaction on Transaction.abort() call', () => {
-        return db.tx('players', 'readwrite', (tx) => {
+        return db.tx('players', 'readwrite', tx => {
             tx.players.put(player);
 
             return tx.players.get(4)
@@ -107,7 +107,7 @@ describe('Transaction', () => {
         });
 
         it('should propagate request error to transaction', () => {
-            return db.tx('players', 'readwrite', (tx) => {
+            return db.tx('players', 'readwrite', tx => {
                     return tx.players.add(player)
                         .then((key) => {
                             assert.equal(key, 4);
@@ -121,7 +121,7 @@ describe('Transaction', () => {
         });
 
         it('should propagate request error to transaction even if no return inside callback', () => {
-            return db.tx('players', 'readwrite', (tx) => {
+            return db.tx('players', 'readwrite', tx => {
                     tx.players.add(player)
                         .then((key) => {
                             assert.equal(key, 4);
@@ -137,23 +137,23 @@ describe('Transaction', () => {
 
     describe('properties', () => {
         it('db', () => {
-            return db.tx('players', 'readwrite', (tx) => {
+            return db.tx('players', 'readwrite', tx => {
                 assert.equal(tx.db.name, 'test');
             });
         });
 
         it('error', () => {
-            return db.tx('players', (tx) => {
+            return db.tx('players', tx => {
                 assert.equal(tx.error, null);
             });
         });
 
         it('mode', () => {
-            const p1 = db.tx('players', 'readwrite', (tx) => {
+            const p1 = db.tx('players', 'readwrite', tx => {
                 assert.equal(tx.mode, 'readwrite');
             });
 
-            const p2 = db.tx('players', (tx2) => {
+            const p2 = db.tx('players', tx2 => {
                 assert.equal(tx2.mode, 'readonly');
             });
 
