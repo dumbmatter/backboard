@@ -4,6 +4,6 @@ browserify:
       name: babelify
 browsers:
   - name: chrome
-    version: 47..latest
+    version: 48..latest
   - name: firefox
-    version: 43..latest
+    version: 44..latest
