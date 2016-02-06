@@ -95,7 +95,7 @@ So the goal of Backboard is to expose all of the functionality of IndexedDB with
                                 .then(() => {
                                     return tx.players.index('tid').getAll(0);
                                 })
-                                .then((players) => {
+                                .then(players => {
                                     console.log(players);
                                 });
                         })
@@ -142,7 +142,7 @@ or
 **Edge/IE**: works only if you use a third-party promises library with synchronous promise resolution (which [is not a good thing](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)). If you want to go down that path, here's how to do it in Bluebird:
 
     const BPromise = require('bluebird');
-    BPromise.setScheduler((fn) => fn());
+    BPromise.setScheduler(fn => fn());
     Backboard.setPromiseConstructor(BPromise);
 
 Also Edge has a buggy IndexedDB implementation in general, so you might run into errors caused by that.
