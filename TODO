@@ -1,3 +1,5 @@
+if there is an error inside tx, does tx get rejected with abort or with that error? which should it do? is this related to firefox bug?
+
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
 
@@ -26,7 +28,6 @@ better documentation
   feature detection in root.js - abstract into lib function, put in documentation
   limitations
   error handling (ideally.. confirm with test)
-    if a request fails, it always aborts the transaction. you can't use event.preventDefault() to commit a transaction while ignoring an error in a request. couldn't figure out a good way to do it, and i don't personally use that feature anyway.
     transaction promise rejects on abort. actual errors should be handled at request level
     db versionchange and quotaexceeded only. you probably do really want to listen to these. versionchange to close, quotaexceeded to do... something
 
