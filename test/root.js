@@ -1,4 +1,4 @@
-const Backboard = require('..');
+import Backboard from '..';
 
 const checkMicrotaskPromiseResolution = () => {
     let bool = true;
@@ -12,7 +12,7 @@ const checkMicrotaskPromiseResolution = () => {
         }
     }];
     return Backboard.open('test', schemas)
-        .then((db) => {
+        .then(db => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players.put({pid: 4})
                     .then(() => tx.players.get(4)) // If native promise implementation does not use microtasks, this will fail https://github.com/jakearchibald/indexeddb-promised#transaction-lifetime
@@ -41,7 +41,7 @@ before(() => {
 
     // Would be better like checkMicrotaskPromiseResolution([() => require('es6-promise').Promise, ...])
     return checkMicrotaskPromiseResolution()
-        .then((bool) => {
+        .then(bool => {
             if (!bool) {
                 console.log('Native promises don\'t use microtasks, so trying es6-promise...');
                 Backboard.setPromiseConstructor(require('es6-promise').Promise);

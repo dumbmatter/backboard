@@ -1,12 +1,8 @@
-const upgrade = require('./lib/upgrade');
-let DB;
+import DB from './lib/db';
+import upgrade from './lib/upgrade';
 
 class Backboard {
     static open(name, schemas) {
-        if (!DB) {
-            DB = require('./lib/db');
-        }
-
         return new Backboard.Promise((resolve, reject) => {
             const latestSchema = schemas[schemas.length - 1];
 
@@ -39,4 +35,4 @@ class Backboard {
 
 Backboard.Promise = Promise;
 
-module.exports = Backboard;
+export default Backboard;

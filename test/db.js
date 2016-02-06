@@ -1,5 +1,5 @@
-const assert = require('assert');
-const Backboard = require('..');
+import assert from 'assert';
+import Backboard from '..';
 
 const schemas = [{
     version: 1,
