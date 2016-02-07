@@ -202,7 +202,3 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
     Additionally, you can do things like saving data, reloading the page, etc. This is exactly the same as the `versionchange` event in the raw IndexedDB API.
 
 That's it! I guess that is still a lot of text to describe error handling, so it's still kind of complicated. But I think it's less complicated than the raw IndexedDB API, and it does everything I want it to. Hopefully you feel the same way.
-
-## API
-
-Todo

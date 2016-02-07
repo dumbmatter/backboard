@@ -21,10 +21,9 @@ better documentation
   but slightly nicer API, pluggable promise library, error handling
   feature detection in root.js - abstract into lib function, put in documentation
   limitations
-  error handling (ideally.. confirm with test)
-    transaction promise rejects on abort. actual errors should be handled at request level
-    db versionchange and quotaexceeded only. you probably do really want to listen to these. versionchange to close, quotaexceeded to do... something
-  Full API
+    getKey, openKeyCursor
+    some cursor functionality missing
+  Full API in a separate file
   npm install
 
 eslint indent won't work because it can't handle double indented function in argument to function that returns promise
