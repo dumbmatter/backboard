@@ -16,7 +16,13 @@ So the goal of Backboard is to expose all of the functionality of IndexedDB with
 
 ## Example Usage
 
+### Database Creation
+
+Import the module:
+
     const Backboard = require('backboard');
+
+Define your database schema, and include all past schemas so Backboard can gracefully upgrade the data from users with old versions.
 
     const schemas = [{
         version: 1,
@@ -52,7 +58,7 @@ So the goal of Backboard is to expose all of the functionality of IndexedDB with
                 }
             }
         },
-        upgradeFunction: (event) => {
+        upgradeFunction: event => {
             // This still uses raw IndexedDB API. Would be nice to do better.
             // Also you'd need to write some manual code here if you want to delete and recreate an object store with different options (not indexes, I mean keyPath and autoIncrement).
             const tx = event.currentTarget.transaction;
@@ -68,62 +74,66 @@ So the goal of Backboard is to expose all of the functionality of IndexedDB with
         }
     }];
 
+Finally, connect to the database and set up some error handling for the cases when the disk space quota is exceeded and another database connection is trying to upgrade (like if another tab has a newer version of your app open). I could have added some default behavior here, but for the reasons described in [the Error Handling section](#error-handling) below, I think it is quite important that you explicitly consider these two specific error cases when developing your app.
+
     Backboard.open('database-name', schemas)
-        .then((db) => {
-            // See the Error Handling section below to learn why you really want to do this
+        .then(db => {
             db.on('quotaexceeded', () => console.log('Quota exceeded! Fuck.'));
             db.on('versionchange', () => db.close());
 
-            // Transaction-free API: each command is in its own transaction
-            return db.players.add({
-                    pid: 4,
+            // Now you can do stuff with db
+        });
+
+### Transaction-Free API
+
+Each command is in its own transaction, which is conceptually simpler but slower. All your favorite IndexedDB methods are available from `db.objectStoreName.methodName`, like `add`, `clear`, `count`, `delete`, `get`, `getAll`, and `put`, and they take the same arguments as their equivalent IndexedDB methods. They return promises that resolve or reject based on the success of the underlying database query.
+
+You can also access indexes and their methods by `db.objectStoreName.index('indexName').methodName`, which similarly supports the `count`, `get`, and `getAll` methods.
+
+    return db.players.add({
+            pid: 4,
+            name: 'Bob Jones',
+            tid: 0
+        })
+        .then(key => {
+            console.log(key);
+            return db.players.index('tid').get(0);
+        })
+        .then(player => console.log(player));
+
+### Transaction-Based API
+
+Transaction can be reused across many queries, which can provide a huge performance boost for IO-heavy tasks. Once a transaction is created with the `db.tx` function (same arguments as native IndexedDB transaction creation), the API is identical to the Transaction-Free API, just with `tx` instead of `db`.
+
+    return db.tx('players', 'readwrite', tx =>
+            return tx.players.add({
                     name: 'Bob Jones',
                     tid: 0
                 })
-                .then(key => {
-                    console.log(key);
-                    return db.players.index('tid').get(0);
-                })
-                .then(player => console.log(player));
                 .then(() => {
-                    // Transaction API: transaction can be reused across many queries - can provide a huge performance boost!
-                    db.tx('players', 'readwrite', tx =>
-                            return tx.players.add({
-                                    name: 'Bob Jones',
-                                    tid: 0
-                                })
-                                .then(() => {
-                                    return tx.players.index('tid').getAll(0);
-                                })
-                                .then(players => {
-                                    console.log(players);
-                                });
-                        })
-                        .then(() => console.log('Transaction completed'));
-                })
-                .then(() => {
-                    // No more cursors!
-                    return db.players.index('tid')
-                        .iterate(Backboard.lowerBound(0), 'next', (p, shortCircuit) => {
-                            // Use the shortCircuit function to stop iteration after this callback runs
-                            if (p.pid > 10) {
-                                shortCircuit();
-                            }
-
-                            // Return undefined (or nothing) and it'll just go to the next object
-                            // Return a value (or a promise that resolves to a value) and it'll replace the object in the database
-                            p.foo = 'updated';
-                            return p;
-                        });
-                })
-                .then(() => {
-                    // Other IndexedDB functions are present too
-                    console.log(db.objectStoreNames);
-                    return db.players.delete(0)
-                        .then(() => db.teams.count())
-                        .then(numTeams => console.log(numTeams))
-                        .then(() => db.teams.clear());
+                    return tx.players.index('tid').getAll(0);
                 });
+        })
+        .then(players => console.log('Transaction completed', players));
+        .catch(err => console.error('Transaction aborted'));
+
+
+### Iteration
+
+Iteration is the part of Backboard that is most different from the IndexedDB API. Instead of a verbose cursor-based API, there is a slightly more complex `iterate` method available on object stores and indexes that lets you concisely iterate over records, optionally updating them as you go by simply returning a value or a promise in the callback function.
+
+    return db.players.index('tid')
+        .iterate(Backboard.lowerBound(0), 'previous', (player, shortCircuit) => {
+            // Use the shortCircuit function to stop iteration after this callback runs
+            if (player.pid > 10) {
+                shortCircuit();
+            }
+
+            // Return undefined (or nothing) and it'll just go to the next object
+            // Return a value (or a promise that resolves to a value) and it'll replace the object in the database
+            player.foo = 'updated';
+            return player;
+        });
 
 ## Browser Compatibility
 
@@ -139,7 +149,7 @@ or
 
     Backboard.setPromiseConstructor(require('es6-promise').Promise);
 
-**Edge/IE**: works only if you use a third-party promises library with synchronous promise resolution (which [is not a good thing](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)). If you want to go down that path, here's how to do it in Bluebird:
+**Edge/IE**: works only if you use a third-party promises library with synchronous promise resolution (which [is not a good thing](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)). If you want to go down that path, here's how to do it with Bluebird:
 
     const BPromise = require('bluebird');
     BPromise.setScheduler(fn => fn());
@@ -158,8 +168,8 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 1. Errors in read/write operations don't bubble up. They just cause the promise for that operation to be rejected. This is because, as in all promise-based code, you should be chaining them together so errors don't get lost. For example:
 
             return db.players.put(x1)
-                .then(db.players.add(x2))
-                .then(db.players.get(4))
+                .then(() => db.players.add(x2))
+                .then(() => db.players.get(4))
                 .then(player => console.log(player));
                 .catch(err => console.error(err)); // Logs an error from any of the above functions
 
@@ -167,14 +177,14 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 
         return db.tx('players', 'readwrite', tx => {
                 return tx.players.put(x1)
-                    .then(tx.players.add(x2))
-                    .then(tx.players.get(4))
+                    .then(() => tx.players.add(x2))
+                    .then(() => tx.players.get(4))
                     .then(player => console.log(player));
                     .catch(err => console.error(err));
             })
             .catch(err => console.error(err)); // Will contain an AbortError if the transaction aborts
 
-    Also, if a request in a transaction fails, it always aborts the transaction. You can't use `event.preventDefault()` in the request's event handler to still commit the transaction like you can in the raw IndexedDB API. If someone actually uses this feature, we can think about how to add it, but I've never used it.
+    Also, if a request in a transaction fails, it always aborts the transaction. There is no equivalent to how you can use `event.preventDefault()` in the request's event handler to still commit the transaction like you can in the raw IndexedDB API. If someone actually uses this feature, we can think about how to add it, but I've never used it.
 
 3. Once the database connection is open, basically no errors propagate down to the database object. There are two exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`, which happens when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
 

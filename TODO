@@ -1,13 +1,10 @@
-if there is an error inside tx, does tx get rejected with abort or with that error? which should it do? is this related to firefox bug?
+upgradefunction
+  tests
+  can use Backboard API inside it?
+    README
 
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
-
-Index.openKeyCursor? maybe skip
-
-Index.getKey
-
-get rid of iterate advance feature. if anyone needs more cursor functions, should implement a more direct translation of cursor API like indexeddb-promised
 
 more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas and you have to parse the string into a number
 
@@ -27,6 +24,8 @@ better documentation
   error handling (ideally.. confirm with test)
     transaction promise rejects on abort. actual errors should be handled at request level
     db versionchange and quotaexceeded only. you probably do really want to listen to these. versionchange to close, quotaexceeded to do... something
+  Full API
+  npm install
 
 eslint indent won't work because it can't handle double indented function in argument to function that returns promise
 
