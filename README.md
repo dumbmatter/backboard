@@ -173,7 +173,7 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
                 .then(player => console.log(player));
                 .catch(err => console.error(err)); // Logs an error from any of the above functions
 
-2. If a transaction is aborted due to an error, the transaction promise is rejected. However if a transaction is manually aborted by calling `tx.abort()`, the transaction promise is not rejected.
+2. If a transaction is aborted due to an error, the transaction promise is rejected. However if a transaction is manually aborted by calling `tx.abort()`, the transaction promise is not rejected unless there is some other uncaught rejection in the promise chain.
 
         return db.tx('players', 'readwrite', tx => {
                 return tx.players.put(x1)
