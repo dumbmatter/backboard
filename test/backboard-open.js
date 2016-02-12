@@ -11,7 +11,7 @@ describe('Backboard.open', () => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
-                const teamStore = upgradeDB.createObjectStore('teams', {keyPath: 'tid', autoIncrement: true});
+                upgradeDB.createObjectStore('teams', {keyPath: 'tid', autoIncrement: true});
             })
             .then(db => {
                 assert.deepEqual([...db.objectStoreNames].sort(), ['players', 'teams']);

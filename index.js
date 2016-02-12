@@ -1,6 +1,6 @@
-import DB from './lib/db';
-import Transaction from './lib/transaction';
-import UpgradeDB from './lib/upgrade-db';
+import DB from './lib/DB';
+import Transaction from './lib/Transaction';
+import UpgradeDB from './lib/UpgradeDB';
 
 class Backboard {
     static open(name, version, upgradeCallback) {
@@ -9,12 +9,10 @@ class Backboard {
             request.onerror = event => reject(event.target.error);
             request.onblocked = () => reject(new Error('Unexpected blocked event'));
             request.onupgradeneeded = event => {
-                const oldVersion = event.oldVersion;
-                const newVersion = event.newVersion;
                 const upgradeDB = new UpgradeDB(event.target.result, event.oldVersion);
                 const tx = new Transaction(upgradeDB, upgradeDB.objectStoreNames, event.currentTarget.transaction);
 
-                upgradeCallback(upgradeDB, tx)
+                upgradeCallback(upgradeDB, tx);
             };
             request.onsuccess = event => resolve(new DB(event.target.result));
         });
