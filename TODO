@@ -1,8 +1,4 @@
 upgradefunction
-  does this make sense? what if you need to run something before creating/deleting stuff, and something after? should i instead just have a simple syntax wrapped around createobjectstore and createindex?
-  tests
-  can use Backboard API inside it?
-    README
   (upgradeDb, tx) => ...
     more thoroughly test second param! createObjectStore needs to make db available on tx, delete needs to remove
 

@@ -1,6 +1,6 @@
 import DB from './lib/db';
 import Transaction from './lib/transaction';
-import upgrade from './lib/upgrade';
+import UpgradeDB from './lib/upgrade-db';
 
 class Backboard {
     static open(name, version, upgradeCallback) {
@@ -11,8 +11,7 @@ class Backboard {
             request.onupgradeneeded = event => {
                 const oldVersion = event.oldVersion;
                 const newVersion = event.newVersion;
-                const upgradeDB = new DB(event.target.result);
-                upgradeDB.oldVersion = event.oldVersion;
+                const upgradeDB = new UpgradeDB(event.target.result, event.oldVersion);
                 const tx = new Transaction(upgradeDB, upgradeDB.objectStoreNames, event.currentTarget.transaction);
 
                 upgradeCallback(upgradeDB, tx)
