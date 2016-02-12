@@ -1,65 +1,42 @@
 import assert from 'assert';
 import Backboard from '..';
 
-const schemas = [{
-    version: 1,
-    objectStores: {
-        players: {
-            options: {keyPath: 'pid', autoIncrement: true},
-            indexes: {
-                tid: {keyPath: 'tid'}
-            }
-        },
-        teams: {
-            options: {keyPath: 'pid', autoIncrement: true},
-            indexes: {
-                tid: {keyPath: 'tid', unique: true}
-            }
-        }
-    }
-}];
-
 describe('Backboard.open', () => {
     afterEach(() => {
         return Backboard.delete('test');
     });
 
     it('should create object stores', () => {
-        return Backboard.open('test', schemas)
-            .then(db => db.close());
+        return Backboard.open('test', 1, upgradeDB => {
+                const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+                playerStore.createIndex('tid', 'tid');
+
+                const teamStore = upgradeDB.createObjectStore('teams', {keyPath: 'tid', autoIncrement: true});
+            })
+            .then(db => {
+                assert.deepEqual([...db.objectStoreNames].sort(), ['players', 'teams']);
+
+                db.close();
+            });
     });
 
     it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
 
     describe('Schema upgrades', () => {
         beforeEach(() => {
-            return Backboard.open('test', schemas)
+            return Backboard.open('test', 1, upgradeDB => {
+                    const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+                    playerStore.createIndex('tid', 'tid');
+
+                    upgradeDB.createObjectStore('teams', {keyPath: 'tid', autoIncrement: true});
+                })
                 .then(db => db.close());
         });
 
         it('should create new object store', () => {
-            const newSchemas = schemas.concat({
-                version: 2,
-                objectStores: {
-                    players: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid'}
-                        }
-                    },
-                    teams: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid', unique: true}
-                        }
-                    },
-                    games: {
-                        options: {keyPath: 'gid', autoIncrement: true}
-                    }
-                }
-            });
-
-            return Backboard.open('test', newSchemas)
+            return Backboard.open('test', 2, upgradeDB => {
+                    upgradeDB.createObjectStore('games');
+                })
                 .then(db => {
                     assert.deepEqual([...db.objectStoreNames].sort(), ['games', 'players', 'teams']);
                     db.close();
@@ -67,71 +44,33 @@ describe('Backboard.open', () => {
         });
 
         it('should delete obsolete object store', () => {
-            const newSchemas = schemas.concat({
-                version: 2,
-                objectStores: {
-                    players: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid'}
-                        }
-                    }
-                }
-            });
 
-            return Backboard.open('test', newSchemas)
+            return Backboard.open('test', 2, upgradeDB => {
+                    upgradeDB.deleteObjectStore('teams');
+                })
                 .then(db => {
                     assert.deepEqual([...db.objectStoreNames].sort(), ['players']);
                     db.close();
                 });
         });
 
-        it('should create new index', () => {
-            const newSchemas = schemas.concat({
-                version: 2,
-                objectStores: {
-                    players: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid'}
-                        }
-                    },
-                    teams: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid', unique: true},
-                            foo: {keyPath: 'foo', unique: true}
-                        }
-                    }
-                }
-            });
-
-            return Backboard.open('test', newSchemas)
+        it.skip('should create new index', () => {
+            return Backboard.open('test', 2, (upgradeDB, tx) => {
+console.log(tx);
+                    tx.teams.createIndex('foo', 'foo', {unique: true});
+                })
                 .then(db => {
                     assert.deepEqual([...db.teams.indexNames].sort(), ['foo', 'tid']);
                     db.close();
                 });
         });
 
-        it('should delete obsolete index', () => {
-            const newSchemas = schemas.concat({
-                version: 2,
-                objectStores: {
-                    players: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid'}
-                        }
-                    },
-                    teams: {
-                        options: {keyPath: 'pid', autoIncrement: true}
-                    }
-                }
-            });
-
-            return Backboard.open('test', newSchemas)
+        it.skip('should delete obsolete index', () => {
+            return Backboard.open('test', 2, (upgradeDB, tx) => {
+                    tx.players.deleteIndex('tid');
+                })
                 .then(db => {
-                    assert.equal(db.teams.indexNames.length, 0);
+                    assert.equal(db.players.indexNames.length, 0);
                     db.close();
                 });
         });
@@ -140,19 +79,7 @@ describe('Backboard.open', () => {
         it('should run upgradeFunction if present');
 
         it('should gracefully handle upgrades when multiple database connections are open', () => {
-            const newSchemas = schemas.concat({
-                version: 2,
-                objectStores: {
-                    players: {
-                        options: {keyPath: 'pid', autoIncrement: true},
-                        indexes: {
-                            tid: {keyPath: 'tid'}
-                        }
-                    }
-                }
-            });
-
-            return Backboard.open('test', schemas)
+            return Backboard.open('test', 1)
                 .then(db => {
                     assert.equal(db.version, 1);
 
@@ -163,7 +90,9 @@ describe('Backboard.open', () => {
                         db.close();
                     });
 
-                    return Backboard.open('test', newSchemas)
+                    return Backboard.open('test', 2, upgradeDB => {
+                            upgradeDB.deleteObjectStore('teams');
+                        })
                         .then(db2 => {
                             assert.equal(db2.version, 2);
                             db2.close();

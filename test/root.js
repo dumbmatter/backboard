@@ -3,15 +3,9 @@ import Backboard from '..';
 const checkMicrotaskPromiseResolution = () => {
     let bool = true;
 
-    const schemas = [{
-        version: 1,
-        objectStores: {
-            players: {
-                options: {keyPath: 'pid', autoIncrement: true}
-            }
-        }
-    }];
-    return Backboard.open('test', schemas)
+    return Backboard.open('test', 1, upgradeDB => {
+            upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+        })
         .then(db => {
             return db.tx('players', 'readwrite', (tx) => {
                 return tx.players.put({pid: 4})

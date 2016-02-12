@@ -2,14 +2,20 @@ import DB from './lib/db';
 import upgrade from './lib/upgrade';
 
 class Backboard {
-    static open(name, schemas) {
+    static open(name, version, upgradeCb) {
         return new Backboard.Promise((resolve, reject) => {
-            const latestSchema = schemas[schemas.length - 1];
-
-            const request = indexedDB.open(name, latestSchema.version);
+            const request = indexedDB.open(name, version);
             request.onerror = event => reject(event.target.error);
             request.onblocked = () => reject(new Error('Unexpected blocked event'));
-            request.onupgradeneeded = event => upgrade(event, schemas);
+            request.onupgradeneeded = event => {
+                const oldVersion = event.oldVersion;
+                const newVersion = event.newVersion;
+                const db = new DB(event.target.result);
+                db.oldVersion = event.oldVersion;
+                const tx = event.currentTarget.transaction;
+
+                upgradeCb(db, tx)
+            };
             request.onsuccess = event => resolve(new DB(event.target.result));
         });
     }

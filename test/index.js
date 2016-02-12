@@ -1,24 +1,6 @@
 import assert from 'assert';
 import Backboard from '..';
 
-const schemas = [{
-    version: 1,
-    objectStores: {
-        players: {
-            options: {keyPath: 'pid', autoIncrement: true},
-            indexes: {
-                tid: {keyPath: 'tid'}
-            }
-        },
-        teams: {
-            options: {keyPath: 'pid', autoIncrement: true},
-            indexes: {
-                tid: {keyPath: 'tid', unique: true}
-            }
-        }
-    }
-}];
-
 let db, player;
 
 describe('Index', () => {
@@ -29,7 +11,13 @@ describe('Index', () => {
             name: 'John Smith'
         };
 
-        return Backboard.open('test', schemas)
+        return Backboard.open('test', 1, upgradeDB => {
+                const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+                playerStore.createIndex('tid', 'tid');
+
+                const teamStore = upgradeDB.createObjectStore('teams', {keyPath: 'tid', autoIncrement: true});
+                teamStore.createIndex('tid', 'tid', {unique: true});
+            })
             .then((dbLocal) => {
                 db = dbLocal;
             });
