@@ -22,61 +22,32 @@ Import the module:
 
     const Backboard = require('backboard');
 
-Define your database schema, and include all past schemas so Backboard can gracefully upgrade the data from users with old versions.
+Define your database schema, including upgrades.
 
-    const schemas = [{
-        version: 1,
-        objectStores: {
-            players: {
-                options: {keyPath: 'pid', autoIncrement: true},
-                indexes: {
-                    tid: {keyPath: 'tid'}
-                }
-            },
-            teams: {
-                options: {keyPath: 'pid', autoIncrement: true},
-                indexes: {
-                    tid: {keyPath: 'tid', unique: true}
-                }
-            }
+    const upgradeCallback = (upgradeDB, tx) => {
+        // Create object stores and indexes just like the raw IndexedDB API
+
+        if (upgradeDB.oldVersion <= 0) {
+            const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+            playerStore.createIndex('tid', 'tid');
+
+            const teamStore = upgradeDB.createObjectStore('teams', {keyPath: 'tid', autoIncrement: true});
         }
-    }, {
-        // This is copy/pasted from version 1, but with a new index. Backboard will do a diff between versions and figure out what needs to be created/deleted/modified. And if you need to update the actual data in the database, you can use the upgradeFunction property.
-        version: 2,
-        objectStores: {
-            players: {
-                options: {keyPath: 'pid', autoIncrement: true},
-                indexes: {
-                    name: {keyPath: 'name', unique: true},
-                    tid: {keyPath: 'tid'}
-                }
-            },
-            teams: {
-                options: {keyPath: 'pid', autoIncrement: true},
-                indexes: {
-                    tid: {keyPath: 'tid', unique: true}
-                }
-            }
-        },
-        upgradeFunction: event => {
-            // This still uses raw IndexedDB API. Would be nice to do better.
-            // Also you'd need to write some manual code here if you want to delete and recreate an object store with different options (not indexes, I mean keyPath and autoIncrement).
-            const tx = event.currentTarget.transaction;
-            tx.objectStore('players').openCursor().onsuccess = (event) => {
-                const cursor = event.target.result;
-                if (cursor) {
-                    const p = cursor.value;
-                    p.name = 'Player Name';
-                    cursor.update(p);
-                    cursor.continue();
-                }
-            };
+
+        if (upgradeDB.oldVersion <= 1) {
+            // You can use upgradeDB and tx like normal db and tx instances described below
+            // tx is readwrite on all object stores and will commit when the upgrade is complete
+            return tx.players
+                .iterate(player => {
+                    player.foo = 'updated';
+                    return player;
+                });
         }
-    }];
+    }
 
 Finally, connect to the database and set up some error handling for the cases when the disk space quota is exceeded and another database connection is trying to upgrade (like if another tab has a newer version of your app open). I could have added some default behavior here, but for the reasons described in [the Error Handling section](#error-handling) below, I think it is quite important that you explicitly consider these two specific error cases when developing your app.
 
-    Backboard.open('database-name', schemas)
+    Backboard.open('database-name', 2, upgradeCallback)
         .then(db => {
             db.on('quotaexceeded', () => console.log('Quota exceeded! Fuck.'));
             db.on('versionchange', () => db.close());

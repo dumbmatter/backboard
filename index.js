@@ -1,8 +1,9 @@
 import DB from './lib/db';
+import Transaction from './lib/transaction';
 import upgrade from './lib/upgrade';
 
 class Backboard {
-    static open(name, version, upgradeCb) {
+    static open(name, version, upgradeCallback) {
         return new Backboard.Promise((resolve, reject) => {
             const request = indexedDB.open(name, version);
             request.onerror = event => reject(event.target.error);
@@ -10,11 +11,11 @@ class Backboard {
             request.onupgradeneeded = event => {
                 const oldVersion = event.oldVersion;
                 const newVersion = event.newVersion;
-                const db = new DB(event.target.result);
-                db.oldVersion = event.oldVersion;
-                const tx = event.currentTarget.transaction;
+                const upgradeDB = new DB(event.target.result);
+                upgradeDB.oldVersion = event.oldVersion;
+                const tx = new Transaction(upgradeDB, upgradeDB.objectStoreNames, event.currentTarget.transaction);
 
-                upgradeCb(db, tx)
+                upgradeCallback(upgradeDB, tx)
             };
             request.onsuccess = event => resolve(new DB(event.target.result));
         });

@@ -4,8 +4,7 @@ upgradefunction
   can use Backboard API inside it?
     README
   (upgradeDb, tx) => ...
-    test second param! createObjectStore needs to make db available on tx, delete needs to remove
-  UpgradeDB extends DB
+    more thoroughly test second param! createObjectStore needs to make db available on tx, delete needs to remove
 
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request

@@ -44,7 +44,6 @@ describe('Backboard.open', () => {
         });
 
         it('should delete obsolete object store', () => {
-
             return Backboard.open('test', 2, upgradeDB => {
                     upgradeDB.deleteObjectStore('teams');
                 })
@@ -54,18 +53,17 @@ describe('Backboard.open', () => {
                 });
         });
 
-        it.skip('should create new index', () => {
+        it('should create new index', () => {
             return Backboard.open('test', 2, (upgradeDB, tx) => {
-console.log(tx);
                     tx.teams.createIndex('foo', 'foo', {unique: true});
                 })
                 .then(db => {
-                    assert.deepEqual([...db.teams.indexNames].sort(), ['foo', 'tid']);
+                    assert.deepEqual([...db.teams.indexNames].sort(), ['foo']);
                     db.close();
                 });
         });
 
-        it.skip('should delete obsolete index', () => {
+        it('should delete obsolete index', () => {
             return Backboard.open('test', 2, (upgradeDB, tx) => {
                     tx.players.deleteIndex('tid');
                 })
