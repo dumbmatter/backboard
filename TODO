@@ -1,5 +1,11 @@
+https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
+
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
+
+should i also have db.on for blocked?
+
+is upgradeDB hooked up to abort handler (and therefore quotaexceeded) by default? if not, how?
 
 what promise library (if any) should be shipped by default?
 
