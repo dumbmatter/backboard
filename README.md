@@ -24,7 +24,7 @@ Import the module:
 
 Define your database schema, including upgrades.
 
-    const upgradeCallback = (upgradeDB, tx) => {
+    const upgradeCallback = upgradeDB => {
         // Create object stores and indexes just like the raw IndexedDB API
 
         if (upgradeDB.oldVersion <= 0) {
@@ -35,9 +35,8 @@ Define your database schema, including upgrades.
         }
 
         if (upgradeDB.oldVersion <= 1) {
-            // You can use upgradeDB and tx like normal db and tx instances described below
-            // tx is readwrite on all object stores and will commit when the upgrade is complete
-            return tx.players
+            // You can use upgradeDB like a normal db described below, except all operations automatically happen in one transaction that commits when the upgrade is complete
+            return upgradeDB.players
                 .iterate(player => {
                     player.foo = 'updated';
                     return player;

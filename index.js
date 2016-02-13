@@ -9,10 +9,11 @@ class Backboard {
             request.onerror = event => reject(event.target.error);
             request.onblocked = () => reject(new Error('Unexpected blocked event'));
             request.onupgradeneeded = event => {
-                const upgradeDB = new UpgradeDB(event.target.result, event.oldVersion);
-                const tx = new Transaction(upgradeDB, [...upgradeDB.objectStoreNames], event.currentTarget.transaction);
+                const rawDB = event.target.result;
+                const tx = new Transaction(upgradeDB, [...rawDB.objectStoreNames], event.currentTarget.transaction);
+                const upgradeDB = new UpgradeDB(rawDB, tx, event.oldVersion);
 
-                upgradeCallback(upgradeDB, tx);
+                upgradeCallback(upgradeDB);
             };
             request.onsuccess = event => resolve(new DB(event.target.result));
         });
@@ -33,7 +34,7 @@ class Backboard {
     }
 }
 
-['lowerBound', 'upperBound', 'only', 'bound'].forEach((keyRangeFunction) => {
+['lowerBound', 'upperBound', 'only', 'bound'].forEach(keyRangeFunction => {
     Backboard[keyRangeFunction] = (...args) => IDBKeyRange.lowerBound.apply(IDBKeyRange, args);
 });
 

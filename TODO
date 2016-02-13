@@ -1,7 +1,6 @@
-upgradefunction
-  (upgradeDB, tx) => ...
-    more thoroughly test second param! createObjectStore needs to make db available on tx, delete needs to remove
-  or should it just work off upgradeDB and somehow transparently use tx behind the scenes?
+upgradeDB tests
+  createObjectStore needs to make object store available on upgradeDB object
+  deleteObjectStore needs to remove object store from upgradeDB object
 
 firefox warning: "mutating the [[Prototype]] of an object will cause your code to run very slowly; instead create the object with the correct initial [[Prototype]] value using Object.create"
 

@@ -54,8 +54,8 @@ describe('Backboard.open', () => {
         });
 
         it('should create new index', () => {
-            return Backboard.open('test', 2, (upgradeDB, tx) => {
-                    tx.teams.createIndex('foo', 'foo', {unique: true});
+            return Backboard.open('test', 2, upgradeDB => {
+                    upgradeDB.teams.createIndex('foo', 'foo', {unique: true});
                 })
                 .then(db => {
                     assert.deepEqual([...db.teams.indexNames].sort(), ['foo']);
@@ -64,8 +64,8 @@ describe('Backboard.open', () => {
         });
 
         it('should delete obsolete index', () => {
-            return Backboard.open('test', 2, (upgradeDB, tx) => {
-                    tx.players.deleteIndex('tid');
+            return Backboard.open('test', 2, upgradeDB => {
+                    upgradeDB.players.deleteIndex('tid');
                 })
                 .then(db => {
                     assert.equal(db.players.indexNames.length, 0);
