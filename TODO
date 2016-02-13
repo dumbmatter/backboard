@@ -1,9 +1,5 @@
-firefox warning: "mutating the [[Prototype]] of an object will cause your code to run very slowly; instead create the object with the correct initial [[Prototype]] value using Object.create"
-
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
-
-more concise schema definition, maybe use version as key of object and then the object stores are the value. only tricky part would be that you need to sort the keys before iterating over the schemas and you have to parse the string into a number
 
 what promise library (if any) should be shipped by default?
 
