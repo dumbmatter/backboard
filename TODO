@@ -10,8 +10,6 @@ what promise library (if any) should be shipped by default?
 for bbgm
   need to show user message on quota error. MAKE FUCKING SURE THIS WORKS. i don't want to accidentally cancle propagation of that
 
-skipped tests
-
 better documentation
   iterate arg order
   similar to

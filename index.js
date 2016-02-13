@@ -13,9 +13,24 @@ class Backboard {
                 const tx = new Transaction(upgradeDB, [...rawDB.objectStoreNames], event.currentTarget.transaction);
                 const upgradeDB = new UpgradeDB(rawDB, tx, event.oldVersion);
 
-                upgradeCallback(upgradeDB);
+                try {
+                    upgradeCallback(upgradeDB);
+                } catch (err) {
+                    tx.abort();
+                    rawDB.close();
+                    reject(err);
+                }
             };
-            request.onsuccess = event => resolve(new DB(event.target.result));
+            request.onsuccess = event => {
+                const rawDB = event.target.result;
+                try {
+                    const db = new DB(rawDB);
+                    resolve(db);
+                } catch (err) {
+                    rawDB.close();
+                    reject(err);
+                }
+            };
         });
     }
 

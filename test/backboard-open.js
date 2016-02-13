@@ -1,5 +1,8 @@
 import assert from 'assert';
+import arrayUnique from 'array-unique';
 import Backboard from '..';
+import DB from '../lib/DB';
+import Transaction from '../lib/Transaction';
 
 describe('Backboard.open', () => {
     afterEach(() => {
@@ -42,10 +45,39 @@ describe('Backboard.open', () => {
             .then(db => db.close());
     });
 
-    describe('object store name collisions', () => {
-        it('should error createObjectStore is called with the same name as a Backboard DB or Transaction property');
+    describe('object store with same name as a Backboard DB or Transaction property', () => {
+        const reservedNames = arrayUnique([]
+            .concat(Object.getOwnPropertyNames(DB.prototype))
+            .concat(Object.getOwnPropertyNames(Transaction.prototype)));
 
-        it('should error when used with a database with a the same name as a Backboard DB or Transaction property');
+        reservedNames.forEach(name => {
+            it('should error when createObjectStore is called with "' + name + '"', () => {
+                return Backboard.open('test', 1, upgradeDB => {
+                        upgradeDB.createObjectStore(name, {keyPath: 'key'});
+                    })
+                    .then(assert.fail)
+                    .catch(err => assert.equal(err.message, 'Backboard cannot support an object store named "' + name + '" due to a name collision with a built-in property'));
+            });
+
+            it('should error when existing database contains "' + name + '"', () => {
+                return new Backboard.Promise((resolve, reject) => {
+                        const request = indexedDB.open('test', 1);
+                        request.onerror = event => reject(event.target.error);
+                        request.onblocked = () => reject(new Error('Unexpected blocked event'));
+                        request.onupgradeneeded = event => {
+                            const rawDB = event.target.result;
+                            rawDB.createObjectStore(name, {keyPath: 'key'});
+                        };
+                        request.onsuccess = event => {
+                            event.target.result.close();
+                            resolve();
+                        };
+                    })
+                    .then(() => Backboard.open('test', 1))
+                    .then(assert.fail)
+                    .catch(err => assert.equal(err.message, 'Backboard cannot support an object store named "' + name + '" due to a name collision with a built-in property'));
+            });
+        });
     });
 
     describe('Schema upgrades', () => {
