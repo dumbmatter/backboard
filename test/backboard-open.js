@@ -42,7 +42,11 @@ describe('Backboard.open', () => {
             .then(db => db.close());
     });
 
-    it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
+    describe('object store name collisions', () => {
+        it('should error createObjectStore is called with the same name as a Backboard DB or Transaction property');
+
+        it('should error when used with a database with a the same name as a Backboard DB or Transaction property');
+    });
 
     describe('Schema upgrades', () => {
         beforeEach(() => {
@@ -94,9 +98,6 @@ describe('Backboard.open', () => {
                     db.close();
                 });
         });
-
-        it('should recreate index if options change'); // How to test this? Need to actually use feature of Index, or read index.multiEntry property (need to expose it first, though)
-        it('should run upgradeFunction if present');
 
         it('should gracefully handle upgrades when multiple database connections are open', () => {
             return Backboard.open('test', 1)
