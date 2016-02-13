@@ -10,7 +10,7 @@ class Backboard {
             request.onblocked = () => reject(new Error('Unexpected blocked event'));
             request.onupgradeneeded = event => {
                 const upgradeDB = new UpgradeDB(event.target.result, event.oldVersion);
-                const tx = new Transaction(upgradeDB, upgradeDB.objectStoreNames, event.currentTarget.transaction);
+                const tx = new Transaction(upgradeDB, [...upgradeDB.objectStoreNames], event.currentTarget.transaction);
 
                 upgradeCallback(upgradeDB, tx);
             };
