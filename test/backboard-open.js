@@ -20,6 +20,28 @@ describe('Backboard.open', () => {
             });
     });
 
+    it('should allow access of newly-created stores on upgradeDB', () => {
+        return Backboard.open('test', 1, upgradeDB => {
+                upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+
+                upgradeDB.players.put({pid: 2, name: 'Bob'})
+                    .then(() => upgradeDB.players.get(2))
+                    .then((player) => assert.equal(player.name, 'Bob'));
+            })
+            .then(db => db.close());
+    });
+
+    it('should remove access to deleted stores on upgradeDB', () => {
+        return Backboard.open('test', 1, upgradeDB => {
+                upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+                assert.equal(upgradeDB.hasOwnProperty('players'), true);
+
+                upgradeDB.deleteObjectStore('players');
+                assert.equal(upgradeDB.hasOwnProperty('players'), false);
+            })
+            .then(db => db.close());
+    });
+
     it('should do something if there is an object store with the same name as a Backboard DB or Transaction property');
 
     describe('Schema upgrades', () => {

@@ -1,7 +1,3 @@
-upgradeDB tests
-  createObjectStore needs to make object store available on upgradeDB object
-  deleteObjectStore needs to remove object store from upgradeDB object
-
 firefox warning: "mutating the [[Prototype]] of an object will cause your code to run very slowly; instead create the object with the correct initial [[Prototype]] value using Object.create"
 
 db.on('quotaexceeded', cb) tests
