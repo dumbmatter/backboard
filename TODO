@@ -1,13 +1,22 @@
+tx0 stuff
+  tests
+  when abort and two Transactions are using the underlying transaction, what happens?
+
+test for throwing error inside upgrade function
+
 transpiling
   https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
   http://stackoverflow.com/a/33683495/786644
 
 db.on('quotaexceeded', cb) tests
   how? the tricky part is how to test propagation from a request
+  reject transactions?
 
 should i also have db.on for blocked?
+  happens before db connection is established though. maybe Backboard.on('blocked'), especially if i bubble up db errors to Backboard, which  might make sense for quotaexceeded so i don't need handlers in upgrade too
 
 is upgradeDB hooked up to abort handler (and therefore quotaexceeded) by default? if not, how?
+  handle on root Backboard like Promise?
 
 what promise library (if any) should be shipped by default?
 
