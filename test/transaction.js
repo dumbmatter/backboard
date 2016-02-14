@@ -147,4 +147,20 @@ describe('Transaction', () => {
             return Promise.all([p1, p2]);
         });
     });
+
+    it('should have sensible order of operations', () => {
+        const operations = [];
+        return db.tx('players', 'readwrite', () => {
+                operations.push(1);
+                return db.tx('players', 'readwrite', () => operations.push(2))
+                    .then(() => {
+                        return new Backboard.Promise(resolve => setTimeout(() => {
+                            operations.push(3);
+                            resolve();
+                        }, 100));
+                    });
+            })
+            .then(() => operations.push(4))
+            .then(() => assert.deepEqual(operations, [1, 2, 3, 4]));
+    });
 });

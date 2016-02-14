@@ -36,11 +36,10 @@ Define your database schema, including upgrades.
 
         if (upgradeDB.oldVersion <= 1) {
             // You can use upgradeDB like a normal db described below, except all operations automatically happen in one transaction that commits when the upgrade is complete
-            return upgradeDB.players
-                .iterate(player => {
-                    player.foo = 'updated';
-                    return player;
-                });
+            return upgradeDB.players.iterate(player => {
+                player.foo = 'updated';
+                return player;
+            });
         }
     }
 
