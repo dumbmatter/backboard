@@ -78,38 +78,46 @@ describe('Transaction', () => {
             .catch(err => assert.equal(err.name, 'TypeError'));
     });
 
-    describe('using prior transaction', () => {
-        it('should use prior transaction when passed', () => {
-            return db.tx('players', tx => {
-                tx._rawTransaction.foo = 'whatever';
+    it('should use prior transaction when passed', () => {
+        return db.tx('players', tx => {
+            tx._rawTransaction.foo = 'whatever';
 
-                return db.tx('players', tx, tx2 => {
-                    assert.equal(tx2._rawTransaction.foo, 'whatever');
-                });
+            return db.tx('players', tx, tx2 => {
+                assert.equal(tx2._rawTransaction.foo, 'whatever');
             });
         });
+    });
 
-        it('should create new transaction if no prior transaction supplied', () => {
+    it('should create new transaction if no prior transaction supplied', () => {
+        return db.tx('players', 'readwrite', tx => {
+            tx.players.put(player);
+
             return db.tx('players', 'readwrite', tx => {
-                tx.players.put(player);
+                return tx.players.get(4)
+                    .then(player => {
+                        assert.equal(player.pid, 4);
 
-                return db.tx('players', 'readwrite', tx => {
-                    return tx.players.get(4)
-                        .then(player => {
-                            assert.equal(player.pid, 4);
+                        tx.abort();
 
-                            tx.abort();
-
-                            return db.players.get(4);
-                        })
-                        .then(player => assert.equal(player.pid, 4));
-                });
+                        return db.players.get(4);
+                    })
+                    .then(player => assert.equal(player.pid, 4));
             });
         });
+    });
 
-        it('should reject multiple Transaction objects using same underlying transaction on abort');
+    it('should resolve multiple Transaction objects using same underlying transaction to different values', () => {
+        return db.tx('players', tx => {
+                return db.tx('players', tx, () => {
+                        return 2;
+                    })
+                    .then(x => {
+                        assert.equal(x, 2);
 
-        it('should resolve multiple Transaction objects using same underlying transaction to different values');
+                        return 1;
+                    });
+            })
+            .then(x => assert.equal(x, 1));
     });
 
     describe('error propagation', () => {
@@ -153,6 +161,43 @@ describe('Transaction', () => {
                 .catch(err => assert.equal(err.name, 'ConstraintError'))
                 .then(() => db.players.get(4))
                 .then((player) => assert.equal(player, undefined));
+        });
+
+        it('should reject multiple Transaction objects using same underlying transaction on abort', (done) => {
+            let numDone = 0;
+            db.tx('players', 'readwrite', tx => {
+                    db.tx('players', 'readwrite', tx, tx2 => {
+                            return tx2.players.add(player)
+                                .then((key) => {
+                                    assert.equal(key, 4);
+                                    return tx2.players.add(player);
+                                });
+                        })
+                        .then(assert.fail)
+                        .catch(err => {
+                            if (err.name !== 'ConstraintError') {
+                                done(err);
+                                throw err;
+                            }
+                        })
+                        .then(() => {
+                            numDone += 1;
+                            if (numDone === 2) { done(); }
+                        });
+                })
+                .then(assert.fail)
+                .catch(err => {
+                    if (err.name !== 'ConstraintError') {
+                        done(err);
+                        throw err;
+                    }
+                })
+                .then(() => db.players.get(4))
+                .then((player) => assert.equal(player, undefined))
+                .then(() => {
+                    numDone += 1;
+                    if (numDone === 2) { done(); }
+                });
         });
     });
 
