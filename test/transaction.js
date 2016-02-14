@@ -78,13 +78,6 @@ describe('Transaction', () => {
             .catch(err => assert.equal(err.name, 'TypeError'));
     });
 
-    describe('using prior transaction', () => {
-        it('should use prior transaction when passed');
-        it('should create new transaction if no prior transaction supplied');
-        it('should reject multiple Transaction objects using same underlying transaction on abort');
-        it('should resolve multiple Transaction objects using same underlying transaction to different values');
-    });
-
     describe('error propagation', () => {
         // Weird hack I don't understand for Firefox. Otherwise this triggers window.onerror for some reason, and that causes the test to fail.
         let originalOnerror;
