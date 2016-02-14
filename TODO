@@ -4,6 +4,8 @@ tx0 stuff
 
 test for throwing error inside upgrade function
 
+test for throwing error inside transaction callback
+
 transpiling
   https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
   http://stackoverflow.com/a/33683495/786644

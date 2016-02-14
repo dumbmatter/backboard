@@ -79,9 +79,36 @@ describe('Transaction', () => {
     });
 
     describe('using prior transaction', () => {
-        it('should use prior transaction when passed');
-        it('should create new transaction if no prior transaction supplied');
+        it('should use prior transaction when passed', () => {
+            return db.tx('players', tx => {
+                tx._rawTransaction.foo = 'whatever';
+
+                return db.tx('players', tx, tx2 => {
+                    assert.equal(tx2._rawTransaction.foo, 'whatever');
+                });
+            });
+        });
+
+        it('should create new transaction if no prior transaction supplied', () => {
+            return db.tx('players', 'readwrite', tx => {
+                tx.players.put(player);
+
+                return db.tx('players', 'readwrite', tx => {
+                    return tx.players.get(4)
+                        .then(player => {
+                            assert.equal(player.pid, 4);
+
+                            tx.abort();
+
+                            return db.players.get(4);
+                        })
+                        .then(player => assert.equal(player.pid, 4));
+                });
+            });
+        });
+
         it('should reject multiple Transaction objects using same underlying transaction on abort');
+
         it('should resolve multiple Transaction objects using same underlying transaction to different values');
     });
 
