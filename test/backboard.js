@@ -153,5 +153,36 @@ describe('Backboard.open', () => {
                         .then(() => assert.equal(versionchangeCount, 1));
                 });
         });
+
+        it('should emit blocked event if versionchange does not close connection', () => {
+            return Backboard.open('test', 1)
+                .then(db => {
+                    assert.equal(db.version, 1);
+
+                    let versionchangeCount = 0;
+                    let blockedCount = 0;
+
+                    db.on('versionchange', () => {
+                        versionchangeCount += 1;
+                    });
+
+                    Backboard.on('blocked', () => {
+                        blockedCount += 1;
+                        db.close();
+                    });
+
+                    return Backboard.open('test', 2, upgradeDB => {
+                            upgradeDB.deleteObjectStore('teams');
+                        })
+                        .then(db2 => {
+                            assert.equal(db2.version, 2);
+                            db2.close();
+                        })
+                        .then(() => {
+                            assert.equal(versionchangeCount, 1);
+                            assert.equal(blockedCount, 1);
+                        });
+                });
+        });
     });
 });
