@@ -45,9 +45,10 @@ Define your database schema, including upgrades.
 
 Finally, connect to the database and set up some error handling for the cases when the disk space quota is exceeded and another database connection is trying to upgrade (like if another tab has a newer version of your app open). I could have added some default behavior here, but for the reasons described in [the Error Handling section](#error-handling) below, I think it is quite important that you explicitly consider these two specific error cases when developing your app.
 
+    Backboard.on('quotaexceeded', () => alert('Quota exceeded! Fuck.'));
+    Backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
     Backboard.open('database-name', 2, upgradeCallback)
         .then(db => {
-            db.on('quotaexceeded', () => console.log('Quota exceeded! Fuck.'));
             db.on('versionchange', () => db.close());
 
             // Now you can do stuff with db
@@ -155,19 +156,23 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 
     Also, if a request in a transaction fails, it always aborts the transaction. There is no equivalent to how you can use `event.preventDefault()` in the request's event handler to still commit the transaction like you can in the raw IndexedDB API. If someone actually uses this feature, we can think about how to add it, but I've never used it.
 
-3. Once the database connection is open, basically no errors propagate down to the database object. There are two exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`, which happens when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
+3. Once the database connection is open, basically no errors propagate down to the database or Backboard objects. There are three exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`, which happens when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
 
         const cb = event => {
             // Do whatever you want here, such as displaying a notification that this error is probably caused by https://code.google.com/p/chromium/issues/detail?id=488851
         };
-        db.on('quotaexceeded', cb);
+        Backboard.on('quotaexceeded', cb);
 
     There is a similar `db.off` function you can use to unsubscribe, like `db.off('quotaexceeded', cb);`.
 
-    The one other event you can listen to is the `versionchange` event, which you get when another instance of the database is trying to upgrade, such as in another tab. At a minimum, you probably want to close the connection so the upgrade can proceed:
+    Another event you can listen for is the `versionchange` event, which you get when another instance of the database is trying to upgrade, such as in another tab. At a minimum, you probably want to close the connection so the upgrade can proceed:
 
         db.on('versionchange', () => db.close());
 
     Additionally, you can do things like saving data, reloading the page, etc. This is exactly the same as the `versionchange` event in the raw IndexedDB API.
+
+    The final event you can listen for is the `blocked` event, which happens when you open a new connection and an upgrade wants to happen but you have an old database connection open that does not close when it recieves a `versionchange` event. This is exactly the same as the `blocked` event in the raw IndexedDB API. In theory if you handle `versionchange` appropriately, this will never happen. But just in case, you can do something like this:
+
+        Backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
 
 That's it! I guess that is still a lot of text to describe error handling, so it's still kind of complicated. But I think it's less complicated than the raw IndexedDB API, and it does everything I want it to. Hopefully you feel the same way.
