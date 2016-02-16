@@ -29,10 +29,14 @@ describe('Transaction', () => {
 
     it('should resolve after transaction completes', () => {
         return db.tx('players', 'readwrite', tx => {
-                tx.players.put(player);
-                player.name = 'Updated';
-                tx.players.put(player);
+                return tx.players.put(player)
+                    .then(() => {
+                        player.name = 'Updated';
+                        return tx.players.put(player);
+                    })
+                    .then(() => 'foo');
             })
+            .then((val) => assert.equal(val, 'foo'))
             .then(() => db.players.get(4))
             .then(playerFromDb => assert.equal(playerFromDb.name, 'Updated'));
     });

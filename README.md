@@ -16,6 +16,8 @@ The name "Backboard" comes from the fact that this project is an offshoot of [a 
 
 ## Example Usage
 
+(Also see [the full API documentation](API.md).)
+
 ### Installation
 
     npm install backboard
@@ -40,7 +42,7 @@ Define your database schema, including upgrades.
 
         if (upgradeDB.oldVersion <= 1) {
             // You can use upgradeDB like a normal db described below, except all operations automatically happen in one transaction that commits when the upgrade is complete
-            return upgradeDB.players.iterate(player => {
+            upgradeDB.players.iterate(player => {
                 player.foo = 'updated';
                 return player;
             });
@@ -108,6 +110,8 @@ Iteration is the part of backboard that is most different from the IndexedDB API
             player.foo = 'updated';
             return player;
         });
+
+(Also see [the full API documentation](API.md).)
 
 ## Browser Compatibility
 
