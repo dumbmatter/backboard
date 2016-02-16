@@ -127,6 +127,21 @@ Opens a transaction on `storeNames` (either a string containing the name of an o
 
 Although it is strictly not required to return promises for all your operations inside a transaction, I recommend that you do so because it makes error handling more straightforward.
 
+### `db.on(name, handler)`
+
+Add handlers to respond to certain database-level events. The only current event is `versionchange` which fires when another database connection is being opened with a newer version (possibly in another tab/window). At a minimum, you probably want to close the connection so the upgrade can proceed:
+
+    db.on('versionchange', () => db.close());
+
+Additionally, you can do things like saving data, reloading the page, etc. This is exactly the same as the `versionchange` event in the raw IndexedDB API.
+
+### `db.off(name, handler)`
+
+Remove an event handler.
+
+    db.on('versionchange', callback);
+    db.off('versionchange', callback);
+
 ### Properties
 
 `db.[ObjectStoreName]` contains an ObjectStore instance for the object store with the given name. For instance, for an object store named 'foo', you can access it with `db.foo`. Then, each command on that object store is done in its own transaction. See [the README](README.md#transaction-free-api) for more.
@@ -173,9 +188,9 @@ These are all identical (or nearly identical) to their equivalents on `IDBTransa
 
 An `ObjectStore` object represents an IndexedDB object store, which you create with `upgradeDB.createObjectStore(name, options)` and access with either `db.[ObjectStoreName]` or `tx.[ObjectStoreName]`.
 
-### `add(value, key)` <br> `clear()` <br> `count(key)` <br> `delete(key)` <br> `get(key)` <br> `getAll(key, count)` <br> `put(value, key)`
+### `objectStore.add(value, key)` <br> `objectStore.clear()` <br> `objectStore.count(key)` <br> `objectStore.delete(key)` <br> `objectStore.get(key)` <br> `objectStore.getAll(key, count)` <br> `objectStore.put(value, key)`
 
-These all work identically to their `IDBObjectStore` counterparts, except they return promises that resolve or reject based on the success or failure of the operation.
+These all work identically to their `IDBObjectStore` counterparts, except they return promises that resolve or reject based on the success or failure of the operation. See [the README](README.md#transaction-free-api) for example usage.
 
 Methods that work only in readwrite transactions: `add(value, key)` inserts a new object into the database, and `put(value, key)` is similar but does an upsert. `clear()` empties the object store. `delete(key)` deletes an object from the store.
 
@@ -184,6 +199,20 @@ Methods that work in any transaction: `count(key)` returns the number of records
 In many of these functions, `key` can be either the value of an object's key or a key range such as from `backboard.lowerBound(lower, open)`, `backboard.upperBound(lower, open)`, `backboard.only(value)`, or `backboard.bound(lower, upper, lowerOpen, upperOpen)`.
 
 ### `objectStore.iterate(key, direction, callback)`
+
+This is an abstraction of IndexedDB's cursors which allows you to iterate over a range of values in an object store.
+
+The first two arguments are optional, so you can also call it like `objectStore.iterate(key, callback)`, `objectStore.iterate(direction, callback)`, or `objectStore.iterate(callback)`.
+
+`key` is a key or key range such as from `backboard.lowerBound(lower, open)`, `backboard.upperBound(lower, open)`, `backboard.only(value)`, or `backboard.bound(lower, upper, lowerOpen, upperOpen)`. If not supplied, all objects will be iterated over.
+
+`direction` is either 'next' or 'prev', determining whether you start at the beginning and work forward ('next') or start at the end and work back ('prev'). Default is 'next'.
+
+`callback` is a function that is run for every object and recieves three arguments. First, the object itself. Second, a function `shortCircuit` that, when called, will stop iteration after the current object. Third, a function `advance` that allows you to skip over multiple records similar to `IDBCursor.advance`.
+
+If the return value of `callback` is an object or a promise that resolves to an object, the original object will be updated with that value.
+
+See [the README](README.md#iteration) for example usage.
 
 ### `objectStore.index(name)`
 
@@ -201,12 +230,26 @@ Deletes an index, same as `IDBObjectStore.deleteIndex`. This only works during v
 
 These are all identical to their equivalents on `IDBObjectStore`.
 
-* `autoIncrement`: Value of the `autoIncrement` option for the underlying object store.
-* `indexNames`: DOMStringList containing the names of the indexes in this object store.
-* `keyPath`: Value of the `keyPath` option for the underlying object store.
+* `objectStore.autoIncrement`: Value of the `autoIncrement` option for the underlying object store.
+* `objectStore.indexNames`: DOMStringList containing the names of the indexes in this object store.
+* `objectStore.keyPath`: Value of the `keyPath` option for the underlying object store.
 
 ## `Index`
 
-An `Index` object represents an IndexedDB object store, which you create with `objectStore.createIndex(name, keyPath, options)` and access with either `objectStore.index(name)`.
+An `Index` object represents an IndexedDB index, which you create with `objectStore.createIndex(name, keyPath, options)` and access with `objectStore.index(name)`.
 
-### ``
+### `index.count(key)` <br> `index.get(key)` <br> `index.getAll(key, count)`
+
+Same as their equivalents in `ObjectStore` but comapring the key against the index rather than the object store.
+
+### `index.iterate(key, direction, callback)`
+
+Same as `objectStore.iterate(key, direction, callback)` but comapring the key against the index rather than the object store.
+
+### Properties
+
+These are all identical to their equivalents on `IDBIndex`.
+
+* `index.keyPath`: Value of the `keyPath` for the underlying index.
+* `index.multiEntry`: Value of the `multiEntry` option for the underlying index.
+* `index.unique`: Value of the `unique` option for the underlying index.

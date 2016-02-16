@@ -99,7 +99,7 @@ Transaction can be reused across many queries, which can provide a huge performa
 Iteration is the part of backboard that is most different from the IndexedDB API. Instead of a verbose cursor-based API, there is a slightly more complex `iterate` method available on object stores and indexes that lets you concisely iterate over records, optionally updating them as you go by simply returning a value or a promise in the callback function.
 
     return db.players.index('tid')
-        .iterate(backboard.lowerBound(0), 'previous', (player, shortCircuit) => {
+        .iterate(backboard.lowerBound(0), 'prev', (player, shortCircuit) => {
             // Use the shortCircuit function to stop iteration after this callback runs
             if (player.pid > 10) {
                 shortCircuit();
