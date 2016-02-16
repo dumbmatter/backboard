@@ -1,6 +1,3 @@
-test for throwing error inside transaction callback
-  should it auto-abort? does it? or manually? see bbgm phase change
-
 https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
 
 better documentation

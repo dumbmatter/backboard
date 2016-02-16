@@ -78,6 +78,20 @@ describe('Transaction', () => {
             .catch(err => assert.equal(err.name, 'TypeError'));
     });
 
+    it('should propagate thrown error to transaction, but not abort transaction', () => {
+        return db.tx('players', 'readwrite', tx => {
+                return tx.players.add(player)
+                    .then((key) => {
+                        assert.equal(key, 4);
+                        throw new Error('foo');
+                    });
+            })
+            .then(assert.fail)
+            .catch(err => assert.equal(err.message, 'foo'))
+            .then(() => db.players.get(4))
+            .then((player) => assert.equal(player.pid, 4));
+    });
+
     describe('error propagation', () => {
         // Weird hack I don't understand for Firefox. Otherwise this triggers window.onerror for some reason, and that causes the test to fail.
         let originalOnerror;
