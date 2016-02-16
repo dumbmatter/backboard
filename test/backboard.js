@@ -45,6 +45,15 @@ describe('backboard.open', () => {
             .then(db => db.close());
     });
 
+    it('should abort connection if error is thrown in upgrade function', () => {
+        return backboard.open('test', 1, upgradeDB => {
+                upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
+                throw new Error('foo');
+            })
+            .then(assert.fail)
+            .catch(err => assert.equal(err.message, 'foo'));
+    });
+
     describe('object store with same name as a backboard DB or Transaction property', () => {
         const reservedNames = arrayUnique([]
             .concat(Object.getOwnPropertyNames(DB.prototype))
