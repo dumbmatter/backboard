@@ -1,5 +1,7 @@
 # Full Backboard API
 
+Since Backboard is based on IndexedDB, you kind of need to understand [the IndexedDB API](https://www.w3.org/TR/2015/REC-IndexedDB-20150108/) to fully understand Backboard. Anything below that references something starting with `IDB` comes from IndexedDB.
+
 ## `backboard`
 
 Main variable exposed by Backboard, which you can access via:
@@ -10,7 +12,7 @@ Main variable exposed by Backboard, which you can access via:
 
 Returns a promise that resolves to a `DB` instance.
 
-`name` is a string containing the database name, `version` is a number containing the database version. Both are passed directly through to [the IndexedDB API](https://www.w3.org/TR/2015/REC-IndexedDB-20150108/).
+`name` is a string containing the database name, `version` is a number containing the database version. Both are passed directly through to `IDBFactory.open`.
 
 `upgradeCallback` is called if `version` is greater than the version last opened, and it is the only place you can create and delete object stores and indexes. It's similar to an event handler for IndexedDB's `upgradeneeded` event. `upgradeCallback` receives an `UpgradeDB` instance which you can use to perform operations on the database.
 
@@ -59,22 +61,24 @@ Add handlers to respond to certain events. The current events are `quotaexceeded
 
 Remove an event handler.
 
-    backboard.on('blocked', cb);
-    backboard.off('blocked', cb);
+    backboard.on('blocked', callback);
+    backboard.off('blocked', callback);
 
 ## `DB`
 
-### `close()`
+A `DB` object represents an open connection to an underlying IndexedDB database, which you obtain from `backboard.open(name, version, upgradeCallback)`.
+
+### `db.close()`
 
 Closes the database connection. This function is synchronous and returns nothing. Same as `IDBDatabase.close()`.
 
     db.close();
 
-### `tx(storeNames, mode, cb)`
+### `db.tx(storeNames, mode, callback)`
 
-Opens a transaction on `storeNames` (either a string containing the name of an object store, or an array of object store names). `mode` can be set to 'readonly' or 'readwrite'. If `mode` is emitted, it defaults to 'readonly'. `cb` is a callback function that recieves a `Transaction` instance.
+Opens a transaction on `storeNames` (either a string containing the name of an object store, or an array of object store names). `mode` can be set to 'readonly' or 'readwrite'. If `mode` is emitted, it defaults to 'readonly'. `callback` is a callback function that recieves a `Transaction` instance.
 
-`tx(storeNames, mode, cb)` returns a promise that, when there is no error, resolves with the return value of `cb` when the transaction completes. If the transaction aborts, the returned promise is rejected. If the transaction completes but there is a non-database-related error thrown in `cb`, the returned promise is also rejected. Here are some examples of these three cases from backboard's unit tests:
+`db.tx(storeNames, mode, callback)` returns a promise that, when there is no error, resolves with the return value of `callback` when the transaction completes. If the transaction aborts, the returned promise is rejected. If the transaction completes but there is a non-database-related error thrown in `callback`, the returned promise is also rejected. Here are some examples of these three cases from backboard's unit tests:
 
     player = {
         pid: 4,
@@ -125,36 +129,84 @@ Although it is strictly not required to return promises for all your operations 
 
 ### Properties
 
+`db.[ObjectStoreName]` contains an ObjectStore instance for the object store with the given name. For instance, for an object store named 'foo', you can access it with `db.foo`. Then, each command on that object store is done in its own transaction. See [the README](README.md#transaction-free-api) for more.
+
 These are all identical to their equivalents on `IDBDatabase`.
 
-* `name`: String, database name.
-* `objectStoreNames` DOMStringList, names of object stores in this database.
-* `version`: Number, database version.
+* `db.name`: String, database name.
+* `db.objectStoreNames` DOMStringList containing the names of the object stores in this database.
+* `db.version`: Number, database version.
 
 ## `UpgradeDB`
 
 `UpgradeDB` inherits from `DB` so it has all the same methods and properties plus some extra ones.
 
-### `createObjectStore(name, options)`
+### `upgradeDB.createObjectStore(name, options)`
 
 Synchronously creates an object store. Options are the same as in `IDBDatabase.createObjectStore`. The `name` is restricted to not collide with any method or property on `DB` or `Transaction` objects.
 
-### `deleteObjectStore(name)`
+### `upgradeDB.deleteObjectStore(name)`
 
 Synchronously deletes an object store, like `IDBDatabase.deleteObjectStore`.
 
 ### Properties
 
-* `oldVersion`: version of the database the previous time it was opened.
+* `upgradeDB.oldVersion`: version of the database the previous time it was opened.
 
 ## `Transaction`
 
-### ``
+A `Transaction` object represents an IndexedDB transaction, which you create with `db.tx(storeNames, mode, callback)`.
+
+### `tx.abort()`
+
+### Properties
+
+`tx.[ObjectStoreName]` contains an ObjectStore instance for the object store with the given name. For instance, for an object store named 'foo' that is part of the current transaction, you can access it with `tx.foo`. Then, each command on that object store is done in the current transaction. See [the README](README.md#transaction-based-api) for more.
+
+These are all identical (or nearly identical) to their equivalents on `IDBTransaction`.
+
+* `tx.db`: Contains the `DB` instance that created this transaction.
+* `tx.error`: If an error occurred in the transaction, this contains the error object. Otherwise it is null.
+* `tx.mode`: Contains the `mode` parameter that was passed to `db.tx`, either 'readwrite' or 'readonly'.
 
 ## `ObjectStore`
 
-### ``
+An `ObjectStore` object represents an IndexedDB object store, which you create with `upgradeDB.createObjectStore(name, options)` and access with either `db.[ObjectStoreName]` or `tx.[ObjectStoreName]`.
+
+### `add(value, key)` <br> `clear()` <br> `count(key)` <br> `delete(key)` <br> `get(key)` <br> `getAll(key, count)` <br> `put(value, key)`
+
+These all work identically to their `IDBObjectStore` counterparts, except they return promises that resolve or reject based on the success or failure of the operation.
+
+Methods that work only in readwrite transactions: `add(value, key)` inserts a new object into the database, and `put(value, key)` is similar but does an upsert. `clear()` empties the object store. `delete(key)` deletes an object from the store.
+
+Methods that work in any transaction: `count(key)` returns the number of records matching `key`, or the number of records total if no `key` is supplied. `get(key)` returns the object matching `key`. `getAll(key, count)` returns all objects matching `key` up to the limit `count` (this method is not actually part of the official IndexedDB spec yet, but it is supported by the latest versions of Chrome and Firefox and [there is a polyfill for older versions](https://github.com/dumbmatter/IndexedDB-getAll-shim)).
+
+In many of these functions, `key` can be either the value of an object's key or a key range such as from `backboard.lowerBound(lower, open)`, `backboard.upperBound(lower, open)`, `backboard.only(value)`, or `backboard.bound(lower, upper, lowerOpen, upperOpen)`.
+
+### `objectStore.iterate(key, direction, callback)`
+
+### `objectStore.index(name)`
+
+Returns an `Index` instance for the underlying IndexedDB index called `name`.
+
+### `objectStore.createIndex(name, keyPath, options)`
+
+Creates a new index, same as `IDBObjectStore.createIndex`. This only works during version upgrades as a part of `UpgradeDB`.
+
+### `objectStore.deleteIndex(name)`
+
+Deletes an index, same as `IDBObjectStore.deleteIndex`. This only works during version upgrades as a part of `UpgradeDB`.
+
+### Properties
+
+These are all identical to their equivalents on `IDBObjectStore`.
+
+* `autoIncrement`: Value of the `autoIncrement` option for the underlying object store.
+* `indexNames`: DOMStringList containing the names of the indexes in this object store.
+* `keyPath`: Value of the `keyPath` option for the underlying object store.
 
 ## `Index`
+
+An `Index` object represents an IndexedDB object store, which you create with `objectStore.createIndex(name, keyPath, options)` and access with either `objectStore.index(name)`.
 
 ### ``
