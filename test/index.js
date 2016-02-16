@@ -1,5 +1,5 @@
 import assert from 'assert';
-import Backboard from '..';
+import backboard from '../index';
 
 let db, player;
 
@@ -11,7 +11,7 @@ describe('Index', () => {
             name: 'John Smith'
         };
 
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
@@ -25,7 +25,7 @@ describe('Index', () => {
 
     afterEach(() => {
         db.close();
-        return Backboard.delete('test');
+        return backboard.delete('test');
     });
 
     describe('get', () => {
@@ -150,7 +150,7 @@ describe('Index', () => {
             let count = 0;
             const tids = [3, 4, 5];
             return db.players.index('tid')
-                .iterate(Backboard.lowerBound(3), player => {
+                .iterate(backboard.lowerBound(3), player => {
                     assert.equal(player.tid, tids[count]);
                     count++;
                 })
@@ -184,7 +184,7 @@ describe('Index', () => {
                 return tx.players.index('tid')
                     .iterate(3, player => {
                         player.updated = true;
-                        return Backboard.Promise.resolve(player);
+                        return backboard.Promise.resolve(player);
                     })
                     .then(() => tx.players.index('tid').get(3))
                     .then(player => assert.equal(player.updated, true));

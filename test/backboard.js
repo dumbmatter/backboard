@@ -1,16 +1,16 @@
 import assert from 'assert';
 import arrayUnique from 'array-unique';
-import Backboard from '..';
+import backboard from '../index';
 import DB from '../lib/DB';
 import Transaction from '../lib/Transaction';
 
-describe('Backboard.open', () => {
+describe('backboard.open', () => {
     afterEach(() => {
-        return Backboard.delete('test');
+        return backboard.delete('test');
     });
 
     it('should create object stores', () => {
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
@@ -24,7 +24,7 @@ describe('Backboard.open', () => {
     });
 
     it('should allow access of newly-created stores on upgradeDB', () => {
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
 
                 upgradeDB.players.put({pid: 2, name: 'Bob'})
@@ -35,7 +35,7 @@ describe('Backboard.open', () => {
     });
 
     it('should remove access to deleted stores on upgradeDB', () => {
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 assert.equal(upgradeDB.hasOwnProperty('players'), true);
 
@@ -45,14 +45,14 @@ describe('Backboard.open', () => {
             .then(db => db.close());
     });
 
-    describe('object store with same name as a Backboard DB or Transaction property', () => {
+    describe('object store with same name as a backboard DB or Transaction property', () => {
         const reservedNames = arrayUnique([]
             .concat(Object.getOwnPropertyNames(DB.prototype))
             .concat(Object.getOwnPropertyNames(Transaction.prototype)));
 
         reservedNames.forEach(name => {
             it('should error when createObjectStore is called with "' + name + '"', () => {
-                return Backboard.open('test', 1, upgradeDB => {
+                return backboard.open('test', 1, upgradeDB => {
                         upgradeDB.createObjectStore(name, {keyPath: 'key'});
                     })
                     .then(assert.fail)
@@ -60,7 +60,7 @@ describe('Backboard.open', () => {
             });
 
             it('should error when existing database contains "' + name + '"', () => {
-                return new Backboard.Promise((resolve, reject) => {
+                return new backboard.Promise((resolve, reject) => {
                         const request = indexedDB.open('test', 1);
                         request.onerror = event => reject(event.target.error);
                         request.onblocked = () => reject(new Error('Unexpected blocked event'));
@@ -73,7 +73,7 @@ describe('Backboard.open', () => {
                             resolve();
                         };
                     })
-                    .then(() => Backboard.open('test', 1))
+                    .then(() => backboard.open('test', 1))
                     .then(assert.fail)
                     .catch(err => assert.equal(err.message, 'Backboard cannot support an object store named "' + name + '" due to a name collision with a built-in property'));
             });
@@ -82,7 +82,7 @@ describe('Backboard.open', () => {
 
     describe('Schema upgrades', () => {
         beforeEach(() => {
-            return Backboard.open('test', 1, upgradeDB => {
+            return backboard.open('test', 1, upgradeDB => {
                     const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                     playerStore.createIndex('tid', 'tid');
 
@@ -92,7 +92,7 @@ describe('Backboard.open', () => {
         });
 
         it('should create new object store', () => {
-            return Backboard.open('test', 2, upgradeDB => {
+            return backboard.open('test', 2, upgradeDB => {
                     upgradeDB.createObjectStore('games');
                 })
                 .then(db => {
@@ -102,7 +102,7 @@ describe('Backboard.open', () => {
         });
 
         it('should delete obsolete object store', () => {
-            return Backboard.open('test', 2, upgradeDB => {
+            return backboard.open('test', 2, upgradeDB => {
                     upgradeDB.deleteObjectStore('teams');
                 })
                 .then(db => {
@@ -112,7 +112,7 @@ describe('Backboard.open', () => {
         });
 
         it('should create new index', () => {
-            return Backboard.open('test', 2, upgradeDB => {
+            return backboard.open('test', 2, upgradeDB => {
                     upgradeDB.teams.createIndex('foo', 'foo', {unique: true});
                 })
                 .then(db => {
@@ -122,7 +122,7 @@ describe('Backboard.open', () => {
         });
 
         it('should delete obsolete index', () => {
-            return Backboard.open('test', 2, upgradeDB => {
+            return backboard.open('test', 2, upgradeDB => {
                     upgradeDB.players.deleteIndex('tid');
                 })
                 .then(db => {
@@ -132,7 +132,7 @@ describe('Backboard.open', () => {
         });
 
         it('should gracefully handle upgrades when multiple database connections are open', () => {
-            return Backboard.open('test', 1)
+            return backboard.open('test', 1)
                 .then(db => {
                     assert.equal(db.version, 1);
 
@@ -143,7 +143,7 @@ describe('Backboard.open', () => {
                         db.close();
                     });
 
-                    return Backboard.open('test', 2, upgradeDB => {
+                    return backboard.open('test', 2, upgradeDB => {
                             upgradeDB.deleteObjectStore('teams');
                         })
                         .then(db2 => {
@@ -155,7 +155,7 @@ describe('Backboard.open', () => {
         });
 
         it('should emit blocked event if versionchange does not close connection', () => {
-            return Backboard.open('test', 1)
+            return backboard.open('test', 1)
                 .then(db => {
                     assert.equal(db.version, 1);
 
@@ -166,12 +166,12 @@ describe('Backboard.open', () => {
                         versionchangeCount += 1;
                     });
 
-                    Backboard.on('blocked', () => {
+                    backboard.on('blocked', () => {
                         blockedCount += 1;
                         db.close();
                     });
 
-                    return Backboard.open('test', 2, upgradeDB => {
+                    return backboard.open('test', 2, upgradeDB => {
                             upgradeDB.deleteObjectStore('teams');
                         })
                         .then(db2 => {

@@ -13,9 +13,10 @@
   "keywords": [
     "indexeddb"
   ],
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "rm -rf dist && babel index.js --out-dir dist && babel lib --out-dir dist/lib",
+    "prepublish": "npm run build",
     "lint": "eslint index.js lib/**.js test/**.js",
     "mocha": "mocha --compilers js:babel-register",
     "test": "npm run lint && npm run mocha",

@@ -1,23 +1,9 @@
-Backboard.on('quotaexceeded', cb) tests
-  how? the tricky part is how to test propagation from a request
-  reject transactions?
-
 test for throwing error inside upgrade function
 
 test for throwing error inside transaction callback
   should it auto-abort? does it? or manually? see bbgm phase change
 
-transpiling
-  https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
-  http://stackoverflow.com/a/33683495/786644
-
-is upgradeDB hooked up to abort handler (and therefore quotaexceeded) by default? if not, how?
-  handle on root Backboard like Promise?
-
-what promise library (if any) should be shipped by default?
-
-for bbgm
-  need to show user message on quota error. MAKE FUCKING SURE THIS WORKS. i don't want to accidentally cancle propagation of that
+https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
 
 better documentation
   iterate arg order
@@ -31,7 +17,5 @@ better documentation
     some cursor functionality missing
   Full API in a separate file
   npm install
-
-eslint indent won't work because it can't handle double indented function in argument to function that returns promise
 
 firefox hack in 'error propagation' tests in test/transaction.js

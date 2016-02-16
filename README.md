@@ -1,4 +1,4 @@
-# Backboard [![Build Status](https://travis-ci.org/dumbmatter/backboard.svg?branch=master)](https://travis-ci.org/dumbmatter/backboard)
+# backboard [![Build Status](https://travis-ci.org/dumbmatter/backboard.svg?branch=master)](https://travis-ci.org/dumbmatter/backboard)
 
 [![Sauce Test Status](https://saucelabs.com/browser-matrix/dumbmatter.svg)](https://saucelabs.com/u/dumbmatter)
 
@@ -16,11 +16,15 @@ So the goal of Backboard is to expose all of the functionality of IndexedDB with
 
 ## Example Usage
 
+### Installation
+
+    npm install backboard
+
 ### Database Creation
 
 Import the module:
 
-    const Backboard = require('backboard');
+    const backboard = require('backboard');
 
 Define your database schema, including upgrades.
 
@@ -45,9 +49,9 @@ Define your database schema, including upgrades.
 
 Finally, connect to the database and set up some error handling for the cases when the disk space quota is exceeded and another database connection is trying to upgrade (like if another tab has a newer version of your app open). I could have added some default behavior here, but for the reasons described in [the Error Handling section](#error-handling) below, I think it is quite important that you explicitly consider these two specific error cases when developing your app.
 
-    Backboard.on('quotaexceeded', () => alert('Quota exceeded! Fuck.'));
-    Backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
-    Backboard.open('database-name', 2, upgradeCallback)
+    backboard.on('quotaexceeded', () => alert('Quota exceeded! Fuck.'));
+    backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
+    backboard.open('database-name', 2, upgradeCallback)
         .then(db => {
             db.on('versionchange', () => db.close());
 
@@ -90,10 +94,10 @@ Transaction can be reused across many queries, which can provide a huge performa
 
 ### Iteration
 
-Iteration is the part of Backboard that is most different from the IndexedDB API. Instead of a verbose cursor-based API, there is a slightly more complex `iterate` method available on object stores and indexes that lets you concisely iterate over records, optionally updating them as you go by simply returning a value or a promise in the callback function.
+Iteration is the part of backboard that is most different from the IndexedDB API. Instead of a verbose cursor-based API, there is a slightly more complex `iterate` method available on object stores and indexes that lets you concisely iterate over records, optionally updating them as you go by simply returning a value or a promise in the callback function.
 
     return db.players.index('tid')
-        .iterate(Backboard.lowerBound(0), 'previous', (player, shortCircuit) => {
+        .iterate(backboard.lowerBound(0), 'previous', (player, shortCircuit) => {
             // Use the shortCircuit function to stop iteration after this callback runs
             if (player.pid > 10) {
                 shortCircuit();
@@ -111,19 +115,19 @@ It's a bit tricky due to [the interaction between promises and IndexedDB transac
 
 **Chrome**: works out of the box.
 
-**Firefox**: works if you use a third-party promises library that resolves promises with microtasks. Bluebird and es6-promise seem to work, and you can make Backboard use them by doing
+**Firefox**: works if you use a third-party promises library that resolves promises with microtasks. Bluebird and es6-promise seem to work, and you can make backboard use them by doing
 
-    Backboard.setPromiseConstructor(require('bluebird'));
+    backboard.setPromiseConstructor(require('bluebird'));
 
 or
 
-    Backboard.setPromiseConstructor(require('es6-promise').Promise);
+    backboard.setPromiseConstructor(require('es6-promise').Promise);
 
 **Edge/IE**: works only if you use a third-party promises library with synchronous promise resolution (which [is not a good thing](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)). If you want to go down that path, here's how to do it with Bluebird:
 
     const BPromise = require('bluebird');
     BPromise.setScheduler(fn => fn());
-    Backboard.setPromiseConstructor(BPromise);
+    backboard.setPromiseConstructor(BPromise);
 
 Also Edge has a buggy IndexedDB implementation in general, so you might run into errors caused by that.
 
@@ -156,12 +160,12 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 
     Also, if a request in a transaction fails, it always aborts the transaction. There is no equivalent to how you can use `event.preventDefault()` in the request's event handler to still commit the transaction like you can in the raw IndexedDB API. If someone actually uses this feature, we can think about how to add it, but I've never used it.
 
-3. Once the database connection is open, basically no errors propagate down to the database or Backboard objects. There are three exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`, which happens when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
+3. Once the database connection is open, basically no errors propagate down to the database or backboard objects. There are three exceptions, **and you almost definitely want to handle these cases in your app**. First, `QuotaExceededError`, which happens when your app uses too much disk space. In the raw IndexedDB API, you get a `QuotaExceededError` in a transaction's abort event, which then bubbles up to the database's abort event. IMHO, this is a very special type of abort because you probably do want to have some kind of central handling of quota errors, since you likely don't want to add that kind of logic to every single transaction. So I made quota aborts special: all other aborts appear as rejected transactions, but quota aborts trigger an event at the database level. Listen to them like this:
 
         const cb = event => {
             // Do whatever you want here, such as displaying a notification that this error is probably caused by https://code.google.com/p/chromium/issues/detail?id=488851
         };
-        Backboard.on('quotaexceeded', cb);
+        backboard.on('quotaexceeded', cb);
 
     There is a similar `db.off` function you can use to unsubscribe, like `db.off('quotaexceeded', cb);`.
 
@@ -173,6 +177,6 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 
     The final event you can listen for is the `blocked` event, which happens when you open a new connection and an upgrade wants to happen but you have an old database connection open that does not close when it recieves a `versionchange` event. This is exactly the same as the `blocked` event in the raw IndexedDB API. In theory if you handle `versionchange` appropriately, this will never happen. But just in case, you can do something like this:
 
-        Backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
+        backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
 
 That's it! I guess that is still a lot of text to describe error handling, so it's still kind of complicated. But I think it's less complicated than the raw IndexedDB API, and it does everything I want it to. Hopefully you feel the same way.

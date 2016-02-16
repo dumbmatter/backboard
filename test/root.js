@@ -1,9 +1,9 @@
-import Backboard from '..';
+import backboard from '../index';
 
 const checkMicrotaskPromiseResolution = () => {
     let bool = true;
 
-    return Backboard.open('test', 1, upgradeDB => {
+    return backboard.open('test', 1, upgradeDB => {
             upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
         })
         .then(db => {
@@ -19,7 +19,7 @@ const checkMicrotaskPromiseResolution = () => {
                     })
                     .then(() => {
                         db.close();
-                        return Backboard.delete('test');
+                        return backboard.delete('test');
                     });
             });
         })
@@ -42,7 +42,7 @@ before(() => {
         .then(bool => {
             if (!bool) {
                 console.log('Native promises don\'t use microtasks, so trying es6-promise...');
-                Backboard.setPromiseConstructor(require('es6-promise').Promise);
+                backboard.setPromiseConstructor(require('es6-promise').Promise);
 
                 return checkMicrotaskPromiseResolution()
                     .then(bool => {

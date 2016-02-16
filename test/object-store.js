@@ -1,5 +1,5 @@
 import assert from 'assert';
-import Backboard from '..';
+import backboard from '../index';
 
 let db, player;
 
@@ -11,7 +11,7 @@ describe('ObjectStore', () => {
             name: 'John Smith'
         };
 
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
@@ -24,7 +24,7 @@ describe('ObjectStore', () => {
 
     afterEach(() => {
         db.close();
-        return Backboard.delete('test');
+        return backboard.delete('test');
     });
 
     describe('add (transaction-free API)', () => {
@@ -86,7 +86,7 @@ describe('ObjectStore', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.clear())
-                .then(() => db.players.count(Backboard.lowerBound(0)))
+                .then(() => db.players.count(backboard.lowerBound(0)))
                 .then(numPlayers => assert.equal(numPlayers, 0));
         });
     });
@@ -98,7 +98,7 @@ describe('ObjectStore', () => {
                     player.pid = 5;
                     return db.players.add(player);
                 })
-                .then(() => db.players.count(Backboard.lowerBound(0)))
+                .then(() => db.players.count(backboard.lowerBound(0)))
                 .then(numPlayers => assert.equal(numPlayers, 2));
         });
     });
@@ -111,7 +111,7 @@ describe('ObjectStore', () => {
                     return db.players.add(player);
                 })
                 .then(() => db.players.delete(4))
-                .then(() => db.players.count(Backboard.lowerBound(0)))
+                .then(() => db.players.count(backboard.lowerBound(0)))
                 .then(numPlayers => {
                     assert.equal(numPlayers, 1);
 
@@ -142,7 +142,7 @@ describe('ObjectStore', () => {
         });
 
         it('should work with query parameter', () => {
-            return db.players.getAll(Backboard.lowerBound(5))
+            return db.players.getAll(backboard.lowerBound(5))
                 .then(players => {
                     assert.equal(players.length, 2);
                     assert.equal(players[0].pid, 5);
@@ -207,7 +207,7 @@ describe('ObjectStore', () => {
             let count = 0;
             const pids = [6, 7, 8];
             return db.players
-                .iterate(Backboard.lowerBound(6), player => {
+                .iterate(backboard.lowerBound(6), player => {
                     assert.equal(player.pid, pids[count]);
                     count++;
                 })
@@ -241,7 +241,7 @@ describe('ObjectStore', () => {
                 return tx.players
                     .iterate(6, player => {
                         player.updated = true;
-                        return Backboard.Promise.resolve(player);
+                        return backboard.Promise.resolve(player);
                     })
                     .then(() => tx.players.get(6))
                     .then(player => assert.equal(player.updated, true));

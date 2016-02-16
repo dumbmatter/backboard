@@ -1,5 +1,5 @@
 import assert from 'assert';
-import Backboard from '..';
+import backboard from '../index';
 
 let db, player;
 
@@ -11,7 +11,7 @@ describe('Transaction', () => {
             name: 'John Smith'
         };
 
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
@@ -24,7 +24,7 @@ describe('Transaction', () => {
 
     afterEach(() => {
         db.close();
-        return Backboard.delete('test');
+        return backboard.delete('test');
     });
 
     it('should resolve after transaction completes', () => {
@@ -154,7 +154,7 @@ describe('Transaction', () => {
                 operations.push(1);
                 return db.tx('players', 'readwrite', () => operations.push(2))
                     .then(() => {
-                        return new Backboard.Promise(resolve => setTimeout(() => {
+                        return new backboard.Promise(resolve => setTimeout(() => {
                             operations.push(3);
                             resolve();
                         }, 100));

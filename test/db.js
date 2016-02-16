@@ -1,11 +1,11 @@
 import assert from 'assert';
-import Backboard from '..';
+import backboard from '../index';
 
 let db;
 
 describe('DB', () => {
     beforeEach(() => {
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
@@ -18,7 +18,7 @@ describe('DB', () => {
 
     afterEach(() => {
         db.close();
-        return Backboard.delete('test');
+        return backboard.delete('test');
     });
 
     describe('properties', () => {

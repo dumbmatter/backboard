@@ -1,11 +1,11 @@
 import assert from 'assert';
-import Backboard from '..';
+import backboard from '../index';
 
 let db;
 
 describe('events', () => {
     beforeEach(() => {
-        return Backboard.open('test', 1, upgradeDB => {
+        return backboard.open('test', 1, upgradeDB => {
                 const playerStore = upgradeDB.createObjectStore('players', {keyPath: 'pid', autoIncrement: true});
                 playerStore.createIndex('tid', 'tid');
 
@@ -18,7 +18,7 @@ describe('events', () => {
 
     afterEach(() => {
         db.close();
-        return Backboard.delete('test');
+        return backboard.delete('test');
     });
 
     describe('db', () => {
@@ -46,21 +46,21 @@ describe('events', () => {
         it('on and off', (done) => {
             let quotaexceededCount = 0;
 
-            Backboard.on('quotaexceeded', value => {
+            backboard.on('quotaexceeded', value => {
                 assert.equal(value, 'bar');
                 quotaexceededCount += 1;
                 if (quotaexceededCount === 2) {
                     done();
                 }
             });
-            Backboard.on('quotaexceeded', value => {
+            backboard.on('quotaexceeded', value => {
                 assert.equal(value, 'bar');
                 quotaexceededCount += 1;
                 if (quotaexceededCount === 2) {
                     done();
                 }
             });
-            Backboard.on('blocked', () => {
+            backboard.on('blocked', () => {
                 done(new Error('Unexpected blocked event'));
             });
 
@@ -68,14 +68,14 @@ describe('events', () => {
                 quotaexceededCount += 1;
                 done(new Error('Removed listener was called'));
             };
-            Backboard.on('quotaexceeded', toRemove);
-            Backboard.off('quotaexceeded', toRemove);
+            backboard.on('quotaexceeded', toRemove);
+            backboard.off('quotaexceeded', toRemove);
 
-            Backboard._emit('quotaexceeded', 'bar');
+            backboard._emit('quotaexceeded', 'bar');
         });
 
         it('error on invalid listener name', () => {
-            assert.throws(() => Backboard.on('foo', () => {}), /Invalid listener name "foo"/);
+            assert.throws(() => backboard.on('foo', () => {}), /Invalid listener name "foo"/);
         });
     });
 });
