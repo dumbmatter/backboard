@@ -4,15 +4,15 @@
 
 Backboard is a thin promise-based wrapper around the IndexedDB API, designed to let you mix promises and IndexedDB without sacrificing performance or writing ridiculously messy code.
 
-This part of the README probably needs to be rewritten, but...
-
-There are other similar projects, but none of them do quite what I want. They all seem to fall in one of these two categories:
+There are other similar projects, but most suffer from one or both of these flaws:
 
 1. They support less features than the raw IndexedDB API, which is not good for a DB-heavy app that is already struggling to deal with IndexedDB's limited feature set.
 
 2. They support extra stuff beyond the raw IndexedDB API, like caching or joins or advanced filtering. That's all great, but then you have this black box sitting between your application and your database, and I don't want a black box potentially interfering with performance or portability or anything like that.
 
-So the goal of Backboard is to expose all of the functionality of IndexedDB with no extra features, just wrapped in a (IMHO) sane promise-based API.
+The most similar projects to Backboard are [Dexie.js](https://github.com/dfahlander/Dexie.js) and [indexeddb-promised](https://github.com/jakearchibald/indexeddb-promised), but they don't provide quite the API that I want. Whether you like one of those libraries better is mainly up to personal preference.
+
+The name "Backboard" comes from the fact that this project is an offshoot of [a basketball video game I wrote](https://basketball-gm.com/).
 
 ## Example Usage
 
@@ -122,6 +122,8 @@ It's a bit tricky due to [the interaction between promises and IndexedDB transac
 or
 
     backboard.setPromiseConstructor(require('es6-promise').Promise);
+
+If you want to do feature detection to conditionally load a third-party promises library in Firefox but not in Chrome, take a look at the code in [test/root.js](test/root.js) which does exactly that.
 
 **Edge/IE**: works only if you use a third-party promises library with synchronous promise resolution (which [is not a good thing](http://blog.izs.me/post/59142742143/designing-apis-for-asynchrony)). If you want to go down that path, here's how to do it with Bluebird:
 

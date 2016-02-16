@@ -1,16 +1,5 @@
 https://booker.codes/how-to-build-and-publish-es6-npm-modules-today-with-babel/
 
-better documentation
-  iterate arg order
-  similar to
-    https://github.com/jakearchibald/indexeddb-promised but a bit more idiosyncratic
-    dexie
-  but slightly nicer API, pluggable promise library, error handling
-  feature detection in root.js - abstract into lib function, put in documentation
-  limitations
-    getKey, openKeyCursor
-    some cursor functionality missing
-  Full API in a separate file
-  npm install
+Full API in a separate file, and link to it from readme
 
 firefox hack in 'error propagation' tests in test/transaction.js
