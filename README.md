@@ -12,7 +12,7 @@ There are other similar projects, but most suffer from one or both of these flaw
 
 The most similar projects to Backboard are [Dexie.js](https://github.com/dfahlander/Dexie.js) and [indexeddb-promised](https://github.com/jakearchibald/indexeddb-promised), but they don't provide quite the API that I want. Whether you like one of those libraries better is mainly up to personal preference.
 
-The name "Backboard" comes from the fact that this project is an offshoot of [a basketball video game I wrote](https://basketball-gm.com/).
+The name "Backboard" comes from the fact that this project is an offshoot of [a basketball video game I wrote](https://github.com/dumbmatter/basketball-gm).
 
 ## Example Usage
 
