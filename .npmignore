@@ -1,4 +1,10 @@
 node_modules
 npm-debug.log
-lib
+lib/*.js
 index.js
+.babelrc
+.eslintrc.json
+.travis.yml
+.zuul.yml
+TODO
+test
