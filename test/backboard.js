@@ -194,4 +194,14 @@ describe('backboard.open', () => {
                 });
         });
     });
+
+    describe('Key range functions', () => {
+        it('bound', () => {
+            const range = backboard.bound([1], [1, ''], true, false);
+            assert.deepEqual(range.lower, [1]);
+            assert.deepEqual(range.upper, [1, '']);
+            assert.equal(range.lowerOpen, true);
+            assert.equal(range.upperOpen, false);
+        });
+    });
 });
