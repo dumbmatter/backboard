@@ -55,7 +55,7 @@ These are just wrappers around their `IDBKeyRange` equivalents. You can use them
 Add handlers to respond to certain events. The current events are `quotaexceeded` which fires when the disk quota is exceeded in any database, and `blocked` which fires when any database connection is blocked. See [the README](README.md#error-handling) for more.
 
     backboard.on('quotaexceeded', event => console.log('Quota exceeded!'));
-    backboard.on('blocked', event => console.log('Databace connection blocked.'));
+    backboard.on('blocked', event => console.log('Database connection blocked.'));
 
 ### `backboard.off(name, handler)`
 
@@ -173,6 +173,25 @@ Synchronously deletes an object store, like `IDBDatabase.deleteObjectStore`.
 A `Transaction` object represents an IndexedDB transaction, which you create with `db.tx(storeNames, mode, callback)`.
 
 ### `tx.abort()`
+
+Synchronously aborts the transaction, same as `IDBTransaction.abort`. Transactions manually aborted this way will not result in a rejected promise unless there is some other uncaught rejection in the promise chain.
+
+    // This promise will resolve to a value of undefined because the transaction is manually aborted and there is no error
+    return db.tx('players', 'readwrite', tx => {
+            tx.abort();
+        });
+
+    // This promise will be rejected because of the error, not the manual abort
+    return db.tx('players', 'readwrite', tx => {
+            tx.abort();
+            throw new Error('Whatever');
+        });
+
+    // This promise will be rejected and the transaction will be aborted because of an IndexedDB error for adding an object with the same key twice
+    return db.tx('players', 'readwrite', tx => {
+            return tx.players.add(player)
+                .then(() => tx.players.add(player));
+        });
 
 ### Properties
 

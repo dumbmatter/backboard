@@ -49,7 +49,7 @@ Define your database schema, including upgrades.
         }
     }
 
-Finally, connect to the database and set up some error handling for the cases when the disk space quota is exceeded and another database connection is trying to upgrade (like if another tab has a newer version of your app open). I could have added some default behavior here, but for the reasons described in [the Error Handling section](#error-handling) below, I think it is quite important that you explicitly consider these two specific error cases when developing your app.
+Finally, connect to the database and set up some error handling for the cases when the disk space quota is exceeded and another database connection is trying to upgrade (like if another tab has a newer version of your app open). I could have added some default behavior here, but for the reasons described in [the Error Handling section](#error-handling) below, I think it is quite important that you explicitly consider these specific error cases when developing your app.
 
     backboard.on('quotaexceeded', () => alert('Quota exceeded! Fuck.'));
     backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
@@ -183,6 +183,6 @@ Backboard removes some of that complexity (or call it "flexibilty" if you want t
 
     The final event you can listen for is the `blocked` event, which happens when you open a new connection and an upgrade wants to happen but you have an old database connection open that does not close when it recieves a `versionchange` event. This is exactly the same as the `blocked` event in the raw IndexedDB API. In theory if you handle `versionchange` appropriately, this will never happen. But just in case, you can do something like this:
 
-        backboard.on('blocked', () => alert('Databace connection blocked. Please close any other tabs or windows with this website open.'));
+        backboard.on('blocked', () => alert('Database connection blocked. Please close any other tabs or windows with this website open.'));
 
 That's it! I guess that is still a lot of text to describe error handling, so it's still kind of complicated. But I think it's less complicated than the raw IndexedDB API, and it does everything I want it to. Hopefully you feel the same way.
