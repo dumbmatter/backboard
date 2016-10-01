@@ -88,10 +88,10 @@ describe('Transaction', () => {
                     .then((key) => {
                         assert.equal(key, 4);
                         throw new Error('foo');
-                    });
+                    })
+                    .then(assert.fail)
+                    .catch(err => assert.equal(err.message, 'foo'));
             })
-            .then(assert.fail)
-            .catch(err => assert.equal(err.message, 'foo'))
             .then(() => db.players.get(4))
             .then((player) => assert.equal(player.pid, 4));
     });
