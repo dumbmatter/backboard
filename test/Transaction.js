@@ -117,7 +117,9 @@ describe('Transaction', () => {
                         .then((key) => {
                             assert.equal(key, 4);
                             return tx.players.add(player);
-                        });
+                        })
+                        .then(assert.fail)
+                        .catch(err => assert.equal(err.name, 'ConstraintError'));
                 })
                 .then(assert.fail)
                 .catch(err => assert.equal(err.name, 'ConstraintError'))
@@ -131,7 +133,9 @@ describe('Transaction', () => {
                         .then((key) => {
                             assert.equal(key, 4);
                             return tx.players.add(player);
-                        });
+                        })
+                        .then(assert.fail)
+                        .catch(err => assert.equal(err.name, 'ConstraintError'));
                 })
                 .then(assert.fail)
                 .catch(err => assert.equal(err.name, 'ConstraintError'))
