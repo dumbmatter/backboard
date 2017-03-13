@@ -1,1 +1,10 @@
 firefox hack in 'error propagation' tests in test/transaction.js
+
+tests:
+IDB error in verisonchange - abort and reject!
+non-IDB error in versionchange - abort and reject!
+IDB error in normal transaction - abort and reject!
+non-IDB error in normal transaction - abort and reject!
+
+documentation:
+always return inside transaction, otherwise some errors might not be propagated
