@@ -88,10 +88,10 @@ describe('Transaction', () => {
                     .then((key) => {
                         assert.equal(key, 4);
                         throw new Error('foo');
-                    });
+                    })
+                    .then(assert.fail)
+                    .catch(err => assert.equal(err.message, 'foo'));
             })
-            .then(assert.fail)
-            .catch(err => assert.equal(err.message, 'foo'))
             .then(() => db.players.get(4))
             .then((player) => assert.equal(player.pid, 4));
     });
@@ -117,7 +117,9 @@ describe('Transaction', () => {
                         .then((key) => {
                             assert.equal(key, 4);
                             return tx.players.add(player);
-                        });
+                        })
+                        .then(assert.fail)
+                        .catch(err => assert.equal(err.name, 'ConstraintError'));
                 })
                 .then(assert.fail)
                 .catch(err => assert.equal(err.name, 'ConstraintError'))
@@ -131,7 +133,9 @@ describe('Transaction', () => {
                         .then((key) => {
                             assert.equal(key, 4);
                             return tx.players.add(player);
-                        });
+                        })
+                        .then(assert.fail)
+                        .catch(err => assert.equal(err.name, 'ConstraintError'));
                 })
                 .then(assert.fail)
                 .catch(err => assert.equal(err.name, 'ConstraintError'))
