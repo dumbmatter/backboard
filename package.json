@@ -21,7 +21,7 @@
     "build-umd": "rm -rf dist/umd && BABEL_ENV=umd babel index.js --out-dir dist/umd && BABEL_ENV=umd babel lib --out-dir dist/umd/lib",
     "prepublish": "npm run build",
     "lint": "eslint index.js lib/**.js test/**.js",
-    "mocha": "mocha --compilers js:babel-register",
+    "mocha": "BABEL_ENV=umd mocha --compilers js:babel-register",
     "test": "npm run lint && npm run mocha",
     "test-browser": "zuul -- test/**.js",
     "test-browser-local": "zuul --local -- test/**.js"
