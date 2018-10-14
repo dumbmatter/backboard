@@ -13,9 +13,12 @@
   "keywords": [
     "indexeddb"
   ],
-  "main": "dist/index.js",
+  "main": "dist/umd/index.js",
+  "module": "dist/esm/index.js",
   "scripts": {
-    "build": "rm -rf dist && babel index.js --out-dir dist && babel lib --out-dir dist/lib",
+    "build": "rm -rf dist && mkdir dist && npm run build-esm && npm run build-umd",
+    "build-esm": "rm -rf dist/esm && BABEL_ENV=esm babel index.js --out-dir dist/esm && BABEL_ENV=esm babel lib --out-dir dist/esm/lib && sed 's/module.exports = backboard/export default backboard/' dist/esm/index.js > dist/esm/index2.js && mv dist/esm/index2.js dist/esm/index.js",
+    "build-umd": "rm -rf dist/umd && BABEL_ENV=umd babel index.js --out-dir dist/umd && BABEL_ENV=umd babel lib --out-dir dist/umd/lib",
     "prepublish": "npm run build",
     "lint": "eslint index.js lib/**.js test/**.js",
     "mocha": "mocha --compilers js:babel-register",
