@@ -1,6 +1,6 @@
 {
   "name": "backboard",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A Promise-based wrapper around IndexedDB with sane error and transaction handling",
   "homepage": "https://github.com/dumbmatter/backboard",
   "repository": {
