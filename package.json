@@ -16,13 +16,13 @@
   "main": "dist/umd/index.js",
   "module": "dist/esm/index.js",
   "scripts": {
-    "build": "rm -rf dist && mkdir dist && npm run build-esm && npm run build-umd",
+    "build": "rm -rf dist && mkdir dist && yarn run build-esm && yarn run build-umd",
     "build-esm": "rm -rf dist/esm && BABEL_ENV=esm babel index.js --out-dir dist/esm && BABEL_ENV=esm babel lib --out-dir dist/esm/lib && sed 's/module.exports = backboard/export default backboard/' dist/esm/index.js > dist/esm/index2.js && mv dist/esm/index2.js dist/esm/index.js",
     "build-umd": "rm -rf dist/umd && BABEL_ENV=umd babel index.js --out-dir dist/umd && BABEL_ENV=umd babel lib --out-dir dist/umd/lib",
-    "prepublish": "npm run build",
+    "prepublish": "yarn run build",
     "lint": "eslint index.js lib/**.js test/**.js",
     "mocha": "BABEL_ENV=umd mocha --compilers js:babel-register",
-    "test": "npm run lint && npm run mocha",
+    "test": "yarn run lint && yarn run mocha",
     "test-browser": "BABEL_ENV=umd zuul -- test/**.js",
     "test-browser-local": "BABEL_ENV=umd zuul --local -- test/**.js"
   },
@@ -43,9 +43,7 @@
   "engines": {
     "node": ">=4.2.0"
   },
-  "dependencies": {
-    "array-unique": "^0.2.1"
-  },
+  "dependencies": {},
   "files": [
     "dist"
   ]
