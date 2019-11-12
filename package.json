@@ -20,9 +20,7 @@
     "prepublish": "yarn run build",
     "lint": "eslint index.js lib/**.js test/**.js",
     "mocha": "BABEL_ENV=test mocha --require @babel/register",
-    "test": "yarn run lint && yarn run mocha",
-    "test-browser": "BABEL_ENV=test zuul -- test/**.js",
-    "test-browser-local": "BABEL_ENV=test zuul --local -- test/**.js"
+    "test": "yarn run lint && yarn run mocha"
   },
   "author": "Jeremy Scheff <jdscheff@gmail.com>",
   "license": "Apache-2.0",
@@ -36,15 +34,13 @@
     "@babel/plugin-transform-modules-commonjs": "^7.7.0",
     "@babel/plugin-transform-parameters": "^7.4.4",
     "@babel/register": "^7.7.0",
-    "babel-plugin-add-module-exports": "^1.0.2",
+    "babelify": "^10.0.0",
     "es6-promise": "^3.0.2",
     "eslint": "^1.10.3",
-    "fake-indexeddb": "^1.0.3",
-    "indexeddb-getall-shim": "^1.2.0",
+    "fake-indexeddb": "^2.1.1",
     "mocha": "^6.2.2",
     "rollup": "^1.27.0",
-    "rollup-plugin-babel": "^4.3.3",
-    "zuul": "^3.9.0"
+    "rollup-plugin-babel": "^4.3.3"
   },
   "engines": {
     "node": ">=4.2.0"

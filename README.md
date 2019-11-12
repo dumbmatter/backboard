@@ -1,7 +1,5 @@
 # backboard [![Build Status](https://travis-ci.org/dumbmatter/backboard.svg?branch=master)](https://travis-ci.org/dumbmatter/backboard)
 
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/dumbmatter.svg)](https://saucelabs.com/u/dumbmatter)
-
 Backboard is a thin promise-based wrapper around the IndexedDB API, designed to let you mix promises and IndexedDB without sacrificing performance or writing ridiculously messy code.
 
 There are other similar projects, but most suffer from one or both of these flaws:

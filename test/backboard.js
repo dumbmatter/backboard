@@ -1,5 +1,4 @@
 import assert from 'assert';
-import arrayUnique from 'array-unique';
 import backboard from '../index';
 import DB from '../lib/DB';
 import Transaction from '../lib/Transaction';
@@ -55,9 +54,9 @@ describe('backboard.open', () => {
     });
 
     describe('object store with same name as a backboard DB or Transaction property', () => {
-        const reservedNames = arrayUnique([]
+        const reservedNames = Array.from(new Set([]
             .concat(Object.getOwnPropertyNames(DB.prototype))
-            .concat(Object.getOwnPropertyNames(Transaction.prototype)));
+            .concat(Object.getOwnPropertyNames(Transaction.prototype))));
 
         reservedNames.forEach(name => {
             it('should error when createObjectStore is called with "' + name + '"', () => {

@@ -35,8 +35,6 @@ before(() => {
         GLOBAL.IDBObjectStore = require('fake-indexeddb/lib/FDBObjectStore');
     }
 
-    require('indexeddb-getall-shim');
-
     // Would be better like checkMicrotaskPromiseResolution([() => require('es6-promise').Promise, ...])
     return checkMicrotaskPromiseResolution()
         .then(bool => {

@@ -1,9 +1,0 @@
-ui: mocha-bdd
-browserify:
-  - transform:
-      name: babelify
-browsers:
-  - name: chrome
-    version: 48..latest
-  - name: firefox
-    version: 44..latest
